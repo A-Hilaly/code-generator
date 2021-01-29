@@ -18,6 +18,7 @@ import (
 )
 
 var (
+	// test
 	// version of application at compile time (-X 'main.version=$(VERSION)').
 	version = "(Unknown Version)"
 	// buildHash GIT hash of application at compile time (-X 'main.buildHash=$(GITCOMMIT)').
