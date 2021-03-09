@@ -52,51 +52,10 @@ func (d *resourceDescriptor) ResourceFromRuntimeObject(
 	}
 }
 
-// Equal returns true if the two supplied AWSResources have the same content.
-// The underlying types of the two supplied AWSResources should be the same. In
-// other words, the Equal() method should be called with the same concrete
-// implementing AWSResource type
-func (d *resourceDescriptor) Equal(
-	a acktypes.AWSResource,
-	b acktypes.AWSResource,
-) bool {
-	ac := a.(*resource)
-	bc := b.(*resource)
-	opts := []cmp.Option{cmpopts.EquateEmpty()}
-	{{- if .CRD.CompareIgnoredFields }}
-	opts = append(opts, cmpopts.IgnoreFields(*ac.ko,
-		{{- range $fieldPath := .CRD.CompareIgnoredFields }}
-		{{ printf "%q" $fieldPath }},
-		{{- end }}
-	))
-	{{- end }}
-	return cmp.Equal(ac.ko, bc.ko, opts...)
-}
-
-// Diff returns a Reporter which provides the difference between two supplied
-// AWSResources. The underlying types of the two supplied AWSResources should
-// be the same. In other words, the Diff() method should be called with the
-// same concrete implementing AWSResource type
-func (d *resourceDescriptor) Diff(
-	a acktypes.AWSResource,
-	b acktypes.AWSResource,
-) *ackcompare.Reporter {
-	ac := a.(*resource)
-	bc := b.(*resource)
-	var diffReporter ackcompare.Reporter
-	opts := []cmp.Option{
-		cmp.Reporter(&diffReporter),
-		cmp.AllowUnexported(svcapitypes.{{ .CRD.Kind }}{}),
-	}
-	{{- if .CRD.CompareIgnoredFields }}
-	opts = append(opts, cmpopts.IgnoreFields(*ac.ko,
-		{{- range $fieldPath := .CRD.CompareIgnoredFields }}
-		{{ printf "%q" $fieldPath }},
-		{{- end }}
-	))
-	{{- end }}
-	cmp.Equal(ac.ko, bc.ko, opts...)
-	return &diffReporter
+// Delta returns an `ackcompare.Delta` object containing the difference between
+// one `AWSResource` and another.
+func (d *resourceDescriptor) Delta(a, b acktypes.AWSResource) *ackcompare.Delta {
+    return newResourceDelta(a, b)
 }
 
 // UpdateCRStatus accepts an AWSResource object and changes the Status
