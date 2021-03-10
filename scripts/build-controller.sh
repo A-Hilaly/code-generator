@@ -185,4 +185,4 @@ mv $config_output_dir/rbac/role.yaml $config_output_dir/rbac/cluster-role-contro
 popd 1>/dev/null
 
 echo "Running gofmt against generated code for $SERVICE"
-gofmt -w "$SERVICE_CONTROLLER_SOURCE_PATH"
+# gofmt -w "$SERVICE_CONTROLLER_SOURCE_PATH"

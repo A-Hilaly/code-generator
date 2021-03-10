@@ -109,7 +109,8 @@ func CompareResource(
 		if nilCode != "" {
 			// else {
 			out += nilCode + " else {\n"
-			indentLevel++
+			out += fmt.Sprintf("%s\tif %s != nil && %s != nil {\n", indent, firstResAdaptedVarName, secondResAdaptedVarName)
+			indentLevel += 2
 		} else {
 			out += "\n"
 		}
@@ -167,6 +168,13 @@ func CompareResource(
 			)
 		}
 		// }
+
+		if nilCode != "" {
+			out += fmt.Sprintf(
+				"%s}\n", indent+"\t",
+			)
+			indentLevel--
+		}
 		out += fmt.Sprintf(
 			"%s}\n", indent,
 		)
