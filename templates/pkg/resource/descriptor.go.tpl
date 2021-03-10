@@ -5,8 +5,6 @@ package {{ .CRD.Names.Snake }}
 import (
 	acktypes "github.com/aws-controllers-k8s/runtime/pkg/types"
 	ackcompare "github.com/aws-controllers-k8s/runtime/pkg/compare"
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sapirt "k8s.io/apimachinery/pkg/runtime"
 	k8sctrlutil "sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -55,7 +53,7 @@ func (d *resourceDescriptor) ResourceFromRuntimeObject(
 // Delta returns an `ackcompare.Delta` object containing the difference between
 // one `AWSResource` and another.
 func (d *resourceDescriptor) Delta(a, b acktypes.AWSResource) *ackcompare.Delta {
-    return newResourceDelta(a, b)
+    return newResourceDelta(a.(*resource), b.(*resource))
 }
 
 // UpdateCRStatus accepts an AWSResource object and changes the Status

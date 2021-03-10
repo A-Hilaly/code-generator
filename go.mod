@@ -18,3 +18,7 @@ require (
 	golang.org/x/mod v0.4.1
 	k8s.io/apimachinery v0.20.1
 )
+
+replace (
+	github.com/aws-controllers-k8s/runtime => ../runtime
+)

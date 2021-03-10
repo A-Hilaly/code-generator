@@ -3,7 +3,7 @@
 package {{ .CRD.Names.Snake }}
 
 import (
-	ackcompare "github.com/aws/aws-controllers-k8s/pkg/compare"
+	ackcompare "github.com/aws-controllers-k8s/runtime/pkg/compare"
 )
 
 // newResourceDelta returns a new `ackcompare.Delta` used to compare two

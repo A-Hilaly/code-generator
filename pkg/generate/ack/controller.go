@@ -54,6 +54,9 @@ var (
 		"ResourceExceptionCode": func(r *ackmodel.CRD, httpStatusCode int) string {
 			return r.ExceptionCode(httpStatusCode)
 		},
+		"GoCodeCompare": func(r *ackmodel.CRD, deltaVarName, firstResVarName string, secondResVarName string, indentLevel int) string {
+			return code.CompareResource(r.Config(), r, deltaVarName, firstResVarName, secondResVarName, indentLevel)
+		},
 		"GoCodeSetExceptionMessagePrefixCheck": func(r *ackmodel.CRD, httpStatusCode int) string {
 			return code.CheckExceptionMessagePrefix(r.Config(), r, httpStatusCode)
 		},
@@ -130,6 +133,7 @@ func Controller(
 
 	// First add all the CRD pkg/resource templates
 	targets := []string{
+		"delta.go.tpl",
 		"descriptor.go.tpl",
 		"identifiers.go.tpl",
 		"manager.go.tpl",
