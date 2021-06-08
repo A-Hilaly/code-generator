@@ -15,7 +15,6 @@ package command
 
 import (
 	"bufio"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -23,12 +22,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/spf13/cobra"
 	k8sversion "k8s.io/apimachinery/pkg/version"
-
-	"github.com/aws-controllers-k8s/code-generator/pkg/generate"
-	ackgenerate "github.com/aws-controllers-k8s/code-generator/pkg/generate/ack"
-	ackmodel "github.com/aws-controllers-k8s/code-generator/pkg/model"
 )
 
 var (
@@ -36,78 +30,6 @@ var (
 	pkgResourcePath   string
 	latestAPIVersion  string
 )
-
-var controllerCmd = &cobra.Command{
-	Use:   "controller <service>",
-	Short: "Generates Go files containing service controller implementation for a given service",
-	RunE:  generateController,
-}
-
-func init() {
-	rootCmd.AddCommand(controllerCmd)
-}
-
-// generateController generates the Go files for a service controller
-func generateController(cmd *cobra.Command, args []string) error {
-	if len(args) != 1 {
-		return fmt.Errorf("please specify the service alias for the AWS service API to generate")
-	}
-	svcAlias := strings.ToLower(args[0])
-	if optOutputPath == "" {
-		optOutputPath = filepath.Join(optServicesDir, svcAlias)
-	}
-
-	if err := ensureSDKRepo(optCacheDir); err != nil {
-		return err
-	}
-	sdkHelper := ackmodel.NewSDKHelper(sdkDir)
-	sdkAPI, err := sdkHelper.API(svcAlias)
-	if err != nil {
-		newSvcAlias, err := FallBackFindServiceID(sdkDir, svcAlias)
-		if err != nil {
-			return err
-		}
-		sdkAPI, err = sdkHelper.API(newSvcAlias) // retry with serviceID
-		if err != nil {
-			return fmt.Errorf("service %s not found", svcAlias)
-		}
-	}
-	latestAPIVersion, err = getLatestAPIVersion()
-	if err != nil {
-		return err
-	}
-	g, err := generate.New(
-		sdkAPI, latestAPIVersion, optGeneratorConfigPath, ackgenerate.DefaultConfig,
-	)
-	if err != nil {
-		return err
-	}
-	ts, err := ackgenerate.Controller(g, optTemplateDirs)
-	if err != nil {
-		return err
-	}
-
-	if err = ts.Execute(); err != nil {
-		return err
-	}
-
-	for path, contents := range ts.Executed() {
-		if optDryRun {
-			fmt.Printf("============================= %s ======================================\n", path)
-			fmt.Println(strings.TrimSpace(contents.String()))
-			continue
-		}
-		outPath := filepath.Join(optOutputPath, path)
-		outDir := filepath.Dir(outPath)
-		if _, err := ensureDir(outDir); err != nil {
-			return err
-		}
-		if err = ioutil.WriteFile(outPath, contents.Bytes(), 0666); err != nil {
-			return err
-		}
-	}
-	return nil
-}
 
 // getLatestAPIVersion looks in a target output directory to determine what the
 // latest Kubernetes API version for CRDs exposed by the generated service

@@ -65,15 +65,17 @@ func isDirWriteable(fp string) bool {
 // repository, which we use model JSON files from. Upon successful return of
 // this function, the sdkDir global variable will be set to the directory where
 // the aws-sdk-go is found
-func ensureSDKRepo(cacheDir string) error {
+func ensureSDKRepo(cacheDir string, version string) error {
+	fmt.Println("DEBUG: Ensuring aws-sdk-go " + version)
 	var err error
 	srcPath := filepath.Join(cacheDir, "src")
 	if err = os.MkdirAll(srcPath, os.ModePerm); err != nil {
 		return err
 	}
+
 	// clone the aws-sdk-go repository locally so we can query for API
 	// information in the models/apis/ directories
-	sdkDir, err = cloneSDKRepo(srcPath)
+	sdkDir, err = cloneSDKRepo(srcPath, version)
 	return err
 }
 
@@ -81,10 +83,13 @@ func ensureSDKRepo(cacheDir string) error {
 // returns the filepath to the clone'd repo. If the aws-sdk-go repository
 // already exists in the cache, it will checkout the current sdk-go version
 // mentionned in 'go.mod' file.
-func cloneSDKRepo(srcPath string) (string, error) {
-	sdkVersion, err := getSDKVersion()
-	if err != nil {
-		return "", err
+func cloneSDKRepo(srcPath string, sdkVersion string) (string, error) {
+	var err error
+	if sdkVersion == "" {
+		sdkVersion, err = getSDKVersion()
+		if err != nil {
+			return "", err
+		}
 	}
 	clonePath := filepath.Join(srcPath, "aws-sdk-go")
 	if optRefreshCache {

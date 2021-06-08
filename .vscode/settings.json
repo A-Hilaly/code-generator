@@ -1,0 +1,5 @@
+{
+    "go.buildTags": "codegen",
+    "go.buildOnSave": "package",
+    "go.lintTool": "golint"
+}

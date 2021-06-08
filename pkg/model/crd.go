@@ -14,6 +14,7 @@
 package model
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 
@@ -438,6 +439,39 @@ func (r *CRD) CustomUpdateMethodName() string {
 // check a corresponding value in the target Spec exists.
 func (r *CRD) ListOpMatchFieldNames() []string {
 	return r.cfg.ListOpMatchFieldNames(r.Names.Original)
+}
+
+func (r *CRD) GetResourceFieldRenames() (
+	map[string]string,
+	map[string]string,
+	error,
+) {
+	resourceConfig, ok := r.cfg.Resources[r.Names.Original]
+	if !ok {
+		return nil, nil, fmt.Errorf("resource not found")
+	}
+
+	oldToNewMap := make(map[string]string)
+	newToOldMap := make(map[string]string)
+
+	opMap := r.sdkAPI.GetOperationMap(r.cfg)
+	createOps := (*opMap)[OpTypeCreate]
+
+	if resourceConfig.Renames != nil && resourceConfig.Renames.Operations != nil {
+		opRenameConfigs := resourceConfig.Renames.Operations
+		for opName, opRenameConfigs := range opRenameConfigs {
+			for createOpName := range createOps {
+				if opName == createOpName {
+					for old, new := range opRenameConfigs.InputFields {
+						oldToNewMap[old] = new
+						newToOldMap[new] = old
+					}
+				}
+			}
+		}
+	}
+
+	return oldToNewMap, newToOldMap, nil
 }
 
 // NewCRD returns a pointer to a new `ackmodel.CRD` struct that describes a

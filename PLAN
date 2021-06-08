@@ -1,0 +1,70 @@
+
+
+
+STEP 1: Simplify/Generalize git functions arround aws-sdk-go
+REASON: We need to be able to load two version schemas (two aws-sdk-go versions) at the same ack-generate execution
+NOTE: carefull pointers, maybe deepcopy or reload?
+
+1 - Change command options to struct
+2 - Change the way ack-generate load/checkout aws-sdk-go repository
+3 - Add a go-go.Repository object to the options struct (1)
+4 - propagate the go-git.Repository object the options struct (2)
+
+STEP 2: Change ack-generate configuration structure
+REASON: the code generator need two configuration to be able to spot the spec/status differences
+        think ignored field, renamed fields, operations configurations...
+NOTE: the configuration should have some information about how what is the Hub version, what is the
+      stored version.
+
+1 - Change generator Config struct
+2 - propagate the change all over the repository (code+tests)
+
+STEP 3: add code generator for ${CRD}_conversions.go
+fix me bitte, danke.
+attention bermuda triangle /\
+
+
+RANDOM BULLET POINTS:
+- Maybe we have to generate the crd json file as well ? https://kubernetes.io/docs/reference/using-api/deprecation-policy/#deprecating-parts-of-the-api
+- CRD definition json file should contain informations about all version
+- We should output json files maybe containing generator.yaml ?
+
+Experience:
+
+
+                                    apiVersion:sdkVersion              default to the biggest default to the biggest
+ack-generate apis --version-mapping v1alpha1:v1.35.35,v1alpha2:v1.36.0 --hub-version v1alpha2 --store-version v1alpha2
+
+
+
+## Technical requirements:
+
+#### Pre implementation:
+
+#### implementation details:
+
+
+
+#### Documentation:
+Document how code generation for multiple version works (conversion, webhooks..)
+Document how does a controller support two or more API versions
+
+
+
+##### Resources:
+
+
+
+
+- developer will upgrqade controllers
+- users will need to have a smooth experience dealing with multiple versions
+
+
+
+We need to implement:
+ack-generate metadata output (generator.yaml, output.json)
+ack-generate conversion functions generation
+ack-generate webhook registration on controller start up
+ack-generate webhook manifests
+ack-generate certificate ca signers (used with webhooks)
+ack-generate e2e tests for multi version CRDs (probably with ECR)

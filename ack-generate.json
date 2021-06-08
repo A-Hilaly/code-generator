@@ -1,0 +1,18 @@
+{
+    "lastUpdated": "jeu. 03 juin 2021 13:27:10 CEST",
+    "ack-generate" : {
+        "version": "v0.2.1",
+        "apisArgs": "--version v1alpha1 --generator-config-path ./somedir",
+        "controllerArgs": "--version v1alpha1 --generator-config-path ./somedir",
+        "releaseArgs": ""
+    },
+    "controller-gen": {
+        "version": "v0.4.0",
+        "crdArgs": "crd:allowDangerousTypes=true paths=./... output:crd:artifacts:config=/somedir/crd/bases",
+        "rbacArgs": "rbac:roleName=ackrole paths=./... output:rbac:artifacts:config=/somedir/rbac"
+    },
+    "env" : {
+        "AWS_SDK_GO_VERSION": "v1.33.35"
+        ...
+    }
+}

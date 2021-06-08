@@ -23,49 +23,33 @@ import (
 
 	"github.com/aws-controllers-k8s/code-generator/pkg/generate"
 	ackgenerate "github.com/aws-controllers-k8s/code-generator/pkg/generate/ack"
+	ackgenconfig "github.com/aws-controllers-k8s/code-generator/pkg/generate/config"
 	ackmodel "github.com/aws-controllers-k8s/code-generator/pkg/model"
 )
 
-var (
-	optReleaseOutputPath  string
-	optImageRepository    string
-	optServiceAccountName string
-)
+var ()
 
-var releaseCmd = &cobra.Command{
-	Use:   "release <service> <release_version>",
-	Short: "Generates release artifacts for a specific service controller and release version",
-	RunE:  generateRelease,
+var webhooksCmd = &cobra.Command{
+	Use:   "webhooks <service>",
+	Short: "Generates Go files containing ",
+	RunE:  generateWebhooks,
 }
 
 func init() {
-	releaseCmd.PersistentFlags().StringVar(
-		&optImageRepository, "image-repository", "amazon/aws-controllers-k8s", "the Docker image repository to use in release artifacts.",
-	)
-	releaseCmd.PersistentFlags().StringVar(
-		&optServiceAccountName, "service-account-name", "default", "The name of the ServiceAccount AND ClusterRole used for ACK service controller",
-	)
-	releaseCmd.PersistentFlags().StringVarP(
-		&optReleaseOutputPath, "output", "o", "", "path to root directory to create generated files. Defaults to "+optServicesDir+"/$service",
-	)
-	rootCmd.AddCommand(releaseCmd)
+	rootCmd.AddCommand(webhooksCmd)
 }
 
-// generateRelease generates the Helm charts and other release artifacts for a
-// service controller and release version
-func generateRelease(cmd *cobra.Command, args []string) error {
-	if len(args) != 2 {
-		return fmt.Errorf("please specify the service alias and the release version to generate release artifacts for")
+// generateWebhooks generates the Go files for a service controller
+func generateWebhooks(cmd *cobra.Command, args []string) error {
+	if len(args) != 1 {
+		return fmt.Errorf("please specify the service alias for the AWS service API to generate")
 	}
 	svcAlias := strings.ToLower(args[0])
-	if optReleaseOutputPath == "" {
-		optReleaseOutputPath = filepath.Join(optServicesDir, svcAlias)
+	if optOutputPath == "" {
+		optOutputPath = filepath.Join(optServicesDir, svcAlias)
 	}
-	// TODO(jaypipes): We could do some git-fu here to verify that the release
-	// version supplied hasn't been used (as a Git tag) before...
-	releaseVersion := strings.ToLower(args[1])
 
-	if err := ensureSDKRepo(optCacheDir); err != nil {
+	if err := ensureSDKRepo(optCacheDir, ""); err != nil {
 		return err
 	}
 	sdkHelper := ackmodel.NewSDKHelper(sdkDir)
@@ -80,16 +64,36 @@ func generateRelease(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("service %s not found", svcAlias)
 		}
 	}
-	g, err := generate.New(
-		sdkAPI, "", optGeneratorConfigPath, ackgenerate.DefaultConfig,
-	)
+	latestAPIVersion, err = getLatestAPIVersion()
 	if err != nil {
 		return err
 	}
-	ts, err := ackgenerate.Release(
-		g, optTemplateDirs,
-		releaseVersion, optImageRepository, optServiceAccountName,
+
+	// read versions
+
+	// read aws-sdk-go versions
+
+	// read generator.yamls
+
+	// determine hub (default is latest - by can be overidable)
+
+	cfg, err := ackgenconfig.New(optGeneratorConfigPath, ackgenerate.DefaultConfig)
+	if err != nil {
+		return err
+	}
+
+	APIs := map[string]*generate.ACKAPI{
+		"v1alpha1": generate.NewACKAPI(true, "v1alpha1", &cfg, sdkAPI),
+	}
+
+	g := generate.NewGenerator(
+		"-", "v1alpha1", nil, APIs,
 	)
+
+	if err != nil {
+		return err
+	}
+	ts, err := ackgenerate.Webhooks(g, optTemplateDirs)
 	if err != nil {
 		return err
 	}
@@ -104,7 +108,7 @@ func generateRelease(cmd *cobra.Command, args []string) error {
 			fmt.Println(strings.TrimSpace(contents.String()))
 			continue
 		}
-		outPath := filepath.Join(optReleaseOutputPath, path)
+		outPath := filepath.Join(optOutputPath, path)
 		outDir := filepath.Dir(outPath)
 		if _, err := ensureDir(outDir); err != nil {
 			return err

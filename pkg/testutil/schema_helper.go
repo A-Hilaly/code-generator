@@ -47,7 +47,7 @@ func NewGeneratorForService(t *testing.T, serviceAlias string) *generate.Generat
 	if _, err := os.Stat(generatorConfigPath); os.IsNotExist(err) {
 		generatorConfigPath = ""
 	}
-	g, err := generate.New(sdkAPI, "v1alpha1", generatorConfigPath, ackgenerate.DefaultConfig)
+	g, err := generate.New(sdkAPI, nil, "v1alpha1", generatorConfigPath, ackgenerate.DefaultConfig)
 	if err != nil {
 		t.Fatal(err)
 	}

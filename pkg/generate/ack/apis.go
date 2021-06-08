@@ -94,6 +94,56 @@ func APIs(
 	return ts, nil
 }
 
+func APIsv2(
+	g *generate.Generator,
+	templateBasePaths []string,
+) (*templateset.TemplateSet, error) {
+	enumDefs, err := g.GetEnumDefs()
+	if err != nil {
+		return nil, err
+	}
+	typeDefs, err := g.GetTypeDefs()
+	if err != nil {
+		return nil, err
+	}
+	crds, err := g.GetCRDs()
+	if err != nil {
+		return nil, err
+	}
+
+	ts := templateset.New(
+		templateBasePaths,
+		apisIncludePaths,
+		apisCopyPaths,
+		apisFuncMap,
+	)
+
+	metaVars := g.MetaVars()
+	apiVars := &templateAPIVars{
+		metaVars,
+		enumDefs,
+		typeDefs,
+	}
+	for _, path := range apisTemplatePaths {
+		outPath := strings.TrimSuffix(filepath.Base(path), ".tpl")
+		if err = ts.Add(outPath, path, apiVars); err != nil {
+			return nil, err
+		}
+	}
+
+	for _, crd := range crds {
+		crdFileName := strcase.ToSnake(crd.Kind) + ".go"
+		crdVars := &templateCRDVars{
+			metaVars,
+			crd,
+		}
+		if err = ts.Add(crdFileName, "apis/crd.go.tpl", crdVars); err != nil {
+			return nil, err
+		}
+	}
+	return ts, nil
+}
+
 // templateAPIVars contains template variables for templates that output Go
 // code in the /services/$SERVICE/apis/$API_VERSION directory
 type templateAPIVars struct {
