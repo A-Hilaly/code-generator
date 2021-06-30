@@ -36,14 +36,12 @@ var (
 	}
 )
 
-// Webhooks returns a pointer to a TemplateSet containing all the templates
+// ConversionWebhooks returns a pointer to a TemplateSet containing all the templates
 // for generating ACK service conversion and defaulting webhooks
-func Webhooks(
+func ConversionWebhooks(
 	mvi *multiversion.MultiVersionInferrer,
 	templateBasePaths []string,
 ) (*templateset.TemplateSet, error) {
-	fmt.Println("called webhook")
-
 	ts := templateset.New(
 		templateBasePaths,
 		webhooksIncludePaths,
@@ -52,7 +50,32 @@ func Webhooks(
 	)
 
 	hubVersion := mvi.GetHubVersion()
+	hubInferrer, err := mvi.GetInferrer(hubVersion)
+	if err != nil {
+		return nil, err
+	}
 
+	hubMetaVars := hubInferrer.MetaVars()
+	hubCRDs, err := hubInferrer.GetCRDs()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, crd := range hubCRDs {
+		convertVars := conversionVars{
+			MetaVars:  hubMetaVars,
+			SourceCRD: crd,
+			IsHub:     true,
+		}
+
+		target := fmt.Sprintf("apis/%s/convert.go", hubVersion)
+		if err = ts.Add(target, "apis/webhooks/conversion.go.tpl", convertVars); err != nil {
+			return nil, err
+		}
+		fmt.Println("added tmp", target)
+	}
+
+	// Generate spoke version conversion functions
 	for _, spokeVersion := range mvi.GetSpokeVersions() {
 		inferrer, err := mvi.GetInferrer(spokeVersion)
 		if err != nil {
@@ -65,22 +88,33 @@ func Webhooks(
 			return nil, err
 		}
 
-		for _, crd := range crds {
+		for i, crd := range crds {
+			/* 			if spokeVersion == "v1" {
+				deltas, err := multiversion.ComputeCRDFieldsDeltas(crd, hubCRDs[i])
+				if err != nil {
+					return nil, err
+				}
+				fmt.Println("----\ndeltas:", len(deltas))
+				for _, delta := range deltas {
+					fmt.Println("changetype:", delta.ChangeType)
+				}
+				fmt.Println("----")
+			} */
+
 			convertVars := conversionVars{
 				MetaVars:   metaVars,
 				SourceCRD:  crd,
-				DestCRD:    crd,
+				DestCRD:    hubCRDs[i],
 				IsHub:      false,
 				HubVersion: hubVersion,
 			}
 
-			target := fmt.Sprintf("apis/%s/convert.go", hubVersion)
+			target := fmt.Sprintf("apis/%s/convert.go", spokeVersion)
 			if err = ts.Add(target, "apis/webhooks/conversion.go.tpl", convertVars); err != nil {
 				return nil, err
 			}
-			fmt.Println("YEY")
+			fmt.Println("added tmp", target)
 		}
-		fmt.Println("YEYY")
 	}
 
 	return ts, nil

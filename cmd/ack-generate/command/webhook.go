@@ -48,10 +48,6 @@ func generateWebhooks(cmd *cobra.Command, args []string) error {
 		optOutputPath = filepath.Join(optServicesDir, svcAlias)
 	}
 
-	if err := ensureSDKRepo(optCacheDir, ""); err != nil {
-		return err
-	}
-
 	files, err := ioutil.ReadDir("../ecr-controller/apis")
 	if err != nil {
 		return err
@@ -70,18 +66,23 @@ func generateWebhooks(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	latestAPIVersion, err := getLatestAPIVersion()
+	//TODO custom hub version
 	mvi, err := multiversion.New(
-		sdkDir,
+		optCacheDir,
 		svcAlias,
 		latestAPIVersion,
 		apisInfos,
 		ack.DefaultConfig,
 	)
+
 	if err != nil {
 		return err
 	}
 
-	ts, err := ackgenerate.Webhooks(mvi, optTemplateDirs)
+	// if conversion/defaulting/validation webhooks enabled
+
+	ts, err := ackgenerate.ConversionWebhooks(mvi, optTemplateDirs)
 	if err != nil {
 		return err
 	}

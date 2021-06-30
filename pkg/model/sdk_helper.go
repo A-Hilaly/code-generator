@@ -57,7 +57,7 @@ func LoadSDKAPI(
 ) (*SDKAPI, error) {
 	err := util.CheckoutRepositoryTag(repo, awsSDKGoVersion)
 	if err != nil {
-		return nil, fmt.Errorf("cannot checkout repository tag %s: %v", serviceAlias, awsSDKGoVersion)
+		return nil, fmt.Errorf("cannot checkout repository tag %s: %v", serviceAlias, err)
 	}
 	return NewSDKHelper(basePath).API(serviceAlias)
 }

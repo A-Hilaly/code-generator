@@ -76,7 +76,9 @@ func New(
 		hubVersion:       hubVersion,
 		spokeVersions:    spokeVersions,
 		inferrersMapping: inferrersMapping,
+		apiInfos:         apisInfo,
 	}
+
 	return mvi, nil
 }
 

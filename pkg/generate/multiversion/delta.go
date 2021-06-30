@@ -54,7 +54,8 @@ func ComputeCRDFieldsDeltas(crd1, crd2 *ackmodel.CRD) ([]FieldDelta, error) {
 		// if field name stayed the same
 		// NOTE: carefull about A -> B then C -> A renames ?
 		if ok {
-			if !specField1.FieldConfig.IsSecret && specField2.FieldConfig.IsSecret {
+			if (specField1.FieldConfig != nil && !specField1.FieldConfig.IsSecret) &&
+				(specField2.FieldConfig != nil && specField2.FieldConfig.IsSecret) {
 				// field changed to secret
 				deltas = append(deltas, FieldDelta{
 					From:       specField1,
@@ -108,7 +109,7 @@ func ComputeCRDFieldsDeltas(crd1, crd2 *ackmodel.CRD) ([]FieldDelta, error) {
 		})
 	}
 
-	return nil, nil
+	return deltas, nil
 }
 
 func isEqualShape(shapeRef1, shapeRef2 *awssdkmodel.ShapeRef) (bool, error) {
