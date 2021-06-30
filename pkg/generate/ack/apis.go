@@ -45,7 +45,7 @@ var (
 // APIs returns a pointer to a TemplateSet containing all the templates for
 // generating ACK service controller's apis/ contents
 func APIs(
-	g *generate.Generator,
+	g *generate.Inferrer,
 	templateBasePaths []string,
 ) (*templateset.TemplateSet, error) {
 	enumDefs, err := g.GetEnumDefs()
@@ -95,7 +95,7 @@ func APIs(
 }
 
 func APIsv2(
-	g *generate.Generator,
+	g *generate.Inferrer,
 	templateBasePaths []string,
 ) (*templateset.TemplateSet, error) {
 	enumDefs, err := g.GetEnumDefs()

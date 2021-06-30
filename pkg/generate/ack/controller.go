@@ -114,7 +114,7 @@ var (
 // Controller returns a pointer to a TemplateSet containing all the templates
 // for generating ACK service controller implementations
 func Controller(
-	g *generate.Generator,
+	g *generate.Inferrer,
 	templateBasePaths []string,
 ) (*templateset.TemplateSet, error) {
 	crds, err := g.GetCRDs()

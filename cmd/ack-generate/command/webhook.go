@@ -21,10 +21,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/aws-controllers-k8s/code-generator/pkg/generate"
+	"github.com/aws-controllers-k8s/code-generator/pkg/generate/ack"
 	ackgenerate "github.com/aws-controllers-k8s/code-generator/pkg/generate/ack"
-	ackgenconfig "github.com/aws-controllers-k8s/code-generator/pkg/generate/config"
-	ackmodel "github.com/aws-controllers-k8s/code-generator/pkg/model"
+	"github.com/aws-controllers-k8s/code-generator/pkg/generate/multiversion"
 )
 
 var ()
@@ -52,48 +51,37 @@ func generateWebhooks(cmd *cobra.Command, args []string) error {
 	if err := ensureSDKRepo(optCacheDir, ""); err != nil {
 		return err
 	}
-	sdkHelper := ackmodel.NewSDKHelper(sdkDir)
-	sdkAPI, err := sdkHelper.API(svcAlias)
+
+	files, err := ioutil.ReadDir("../ecr-controller/apis")
 	if err != nil {
-		newSvcAlias, err := FallBackFindServiceID(sdkDir, svcAlias)
+		return err
+	}
+
+	apisInfos := map[string]multiversion.APIInfo{}
+	for _, f := range files {
+		metadata, err := ack.LoadGenerationMetadata("../ecr-controller/apis", f.Name())
 		if err != nil {
 			return err
 		}
-		sdkAPI, err = sdkHelper.API(newSvcAlias) // retry with serviceID
-		if err != nil {
-			return fmt.Errorf("service %s not found", svcAlias)
+		apisInfos[f.Name()] = multiversion.APIInfo{
+			IsDeprecated:        false,
+			AWSSDKVersion:       metadata.AWSSDKGoVersion,
+			GeneratorConfigPath: "../ecr-controller/apis/" + f.Name() + "/generator.yaml",
 		}
 	}
-	latestAPIVersion, err = getLatestAPIVersion()
-	if err != nil {
-		return err
-	}
 
-	// read versions
-
-	// read aws-sdk-go versions
-
-	// read generator.yamls
-
-	// determine hub (default is latest - by can be overidable)
-
-	cfg, err := ackgenconfig.New(optGeneratorConfigPath, ackgenerate.DefaultConfig)
-	if err != nil {
-		return err
-	}
-
-	APIs := map[string]*generate.ACKAPI{
-		"v1alpha1": generate.NewACKAPI(true, "v1alpha1", &cfg, sdkAPI),
-	}
-
-	g := generate.NewGenerator(
-		"-", "v1alpha1", nil, APIs,
+	mvi, err := multiversion.New(
+		sdkDir,
+		svcAlias,
+		latestAPIVersion,
+		apisInfos,
+		ack.DefaultConfig,
 	)
-
 	if err != nil {
 		return err
 	}
-	ts, err := ackgenerate.Webhooks(g, optTemplateDirs)
+
+	ts, err := ackgenerate.Webhooks(mvi, optTemplateDirs)
 	if err != nil {
 		return err
 	}

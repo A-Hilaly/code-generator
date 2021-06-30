@@ -1,4 +1,4 @@
-package versionmapper
+package multiversion
 
 import (
 	"encoding/json"
@@ -43,6 +43,9 @@ type FieldDelta struct {
 // we are assuming that resource name doesn't change.
 func ComputeCRDFieldsDeltas(crd1, crd2 *ackmodel.CRD) ([]FieldDelta, error) {
 	deltas := make([]FieldDelta, 0, len(crd2.SpecFields)+len(crd2.StatusFields))
+
+	// if same aws-sdk-go and same generator.yaml return all intact
+
 	// visitedFields := map[string]struct{}{}
 
 	for _, specField1Name := range crd1.SpecFieldNames() {

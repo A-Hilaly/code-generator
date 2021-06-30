@@ -322,3 +322,29 @@ func (g *Inferrer) GetEnumDefs() ([]*ackmodel.EnumDef, error) {
 	})
 	return edefs, nil
 }
+
+// New returns a new Generator struct for a supplied API model.
+// Optionally, pass a file path to a generator config file that can be used to
+// instruct the code generator how to handle the API properly
+func New(
+	SDKAPI *ackmodel.SDKAPI,
+	apiVersion string,
+	configPath string,
+	defaultConfig ackgenconfig.Config,
+	opts ...func(i *Inferrer),
+) (*Inferrer, error) {
+	cfg, err := ackgenconfig.New(configPath, defaultConfig)
+	if err != nil {
+		return nil, err
+	}
+	g := &Inferrer{
+		SDKAPI: SDKAPI,
+		// TODO(jaypipes): Handle cases where service alias and service ID
+		// don't match (Step Functions)
+		serviceAlias: SDKAPI.ServiceID(),
+		apiVersion:   apiVersion,
+		cfg:          &cfg,
+	}
+	ApplyShapeIgnoreRules(SDKAPI, &cfg)
+	return g, nil
+}

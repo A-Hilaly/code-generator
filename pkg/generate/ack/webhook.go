@@ -17,8 +17,8 @@ import (
 	"fmt"
 	ttpl "text/template"
 
-	"github.com/aws-controllers-k8s/code-generator/pkg/generate"
 	"github.com/aws-controllers-k8s/code-generator/pkg/generate/code"
+	"github.com/aws-controllers-k8s/code-generator/pkg/generate/multiversion"
 	"github.com/aws-controllers-k8s/code-generator/pkg/generate/templateset"
 	ackmodel "github.com/aws-controllers-k8s/code-generator/pkg/model"
 )
@@ -39,14 +39,9 @@ var (
 // Webhooks returns a pointer to a TemplateSet containing all the templates
 // for generating ACK service conversion and defaulting webhooks
 func Webhooks(
-	g *generate.Generator,
+	mvi *multiversion.MultiVersionInferrer,
 	templateBasePaths []string,
 ) (*templateset.TemplateSet, error) {
-	crds, err := g.GetCRDs()
-	if err != nil {
-		return nil, err
-	}
-
 	fmt.Println("called webhook")
 
 	ts := templateset.New(
@@ -56,23 +51,37 @@ func Webhooks(
 		webhooksFuncMap,
 	)
 
-	metaVars := g.MetaVars()
+	hubVersion := mvi.GetHubVersion()
 
-	for _, crd := range crds {
-
-		convertVars := conversionVars{
-			MetaVars:   metaVars,
-			SourceCRD:  crd,
-			DestCRD:    crd,
-			IsHub:      false,
-			HubVersion: "v1alpha1",
-		}
-		if err = ts.Add("apis/v1alpha1/convert.go", "apis/webhooks/conversion.go.tpl", convertVars); err != nil {
+	for _, spokeVersion := range mvi.GetSpokeVersions() {
+		inferrer, err := mvi.GetInferrer(spokeVersion)
+		if err != nil {
 			return nil, err
 		}
-		fmt.Println("YEY")
+
+		metaVars := inferrer.MetaVars()
+		crds, err := inferrer.GetCRDs()
+		if err != nil {
+			return nil, err
+		}
+
+		for _, crd := range crds {
+			convertVars := conversionVars{
+				MetaVars:   metaVars,
+				SourceCRD:  crd,
+				DestCRD:    crd,
+				IsHub:      false,
+				HubVersion: hubVersion,
+			}
+
+			target := fmt.Sprintf("apis/%s/convert.go", hubVersion)
+			if err = ts.Add(target, "apis/webhooks/conversion.go.tpl", convertVars); err != nil {
+				return nil, err
+			}
+			fmt.Println("YEY")
+		}
+		fmt.Println("YEYY")
 	}
-	fmt.Println("YEYY")
 
 	return ts, nil
 }

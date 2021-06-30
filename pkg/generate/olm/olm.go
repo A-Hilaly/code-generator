@@ -39,7 +39,7 @@ var (
 // BundleAssets generates the assets necessary to generate
 // a bundle used for deploying a service via OLM.
 func BundleAssets(
-	g *generate.Generator,
+	g *generate.Inferrer,
 	commonMeta CommonMetadata,
 	serviceConfig ServiceConfig,
 	vers string,

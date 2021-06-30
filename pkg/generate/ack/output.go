@@ -145,7 +145,7 @@ func CreateGenerationMetadata(
 	return nil
 }
 
-func LoadGenerationMetadata(apiVersion, apisPath string) (*GenerationMetadata, error) {
+func LoadGenerationMetadata(apisPath, apiVersion string) (*GenerationMetadata, error) {
 	filePath := filepath.Join(apisPath, apiVersion, outputFileName)
 	b, err := ioutil.ReadFile(filePath)
 	if err != nil {
