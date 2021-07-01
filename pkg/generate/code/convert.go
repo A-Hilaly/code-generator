@@ -51,6 +51,11 @@ func ConvertTo(
 		panic("delta error" + err.Error())
 	}
 
+	out += fmt.Sprintf(
+		"%sobjectMetadataCopy := src.ObjectMeta\n\n",
+		indent,
+	)
+
 	for _, delta := range deltas {
 		from := delta.From
 		to := delta.To
@@ -82,10 +87,19 @@ func ConvertTo(
 				indentLevel,
 			)
 		case multiversion.ChangeTypeAdded:
-			fmt.Println("added field")
-		case multiversion.ChangeTypeRemoved:
-			fmt.Println("removed field", delta.From.Names.Camel)
+			out += "\t// ChangeType: removed\n"
 
+		case multiversion.ChangeTypeRemoved:
+			fmt.Println("field added")
+			out += "\t// ChangeType: added\n"
+			out += copyRemovedField(
+				from,
+				hubImportAlias,
+				varFrom,
+				varTo,
+				isCopyingFromHub,
+				indentLevel,
+			)
 		case multiversion.ChangeTypeShapeChanged, multiversion.ChangeTypeShapeChangedToSecret:
 			panic("not implemented")
 		case multiversion.ChangeTypeUnknown:
@@ -95,6 +109,8 @@ func ConvertTo(
 	}
 
 	// copy metadata
+
+	out += "\n\tdst.ObjectMeta = objectMetadataCopy\n"
 
 	// copy status
 	// TODO(a-hilaly) compute status diff and convert
@@ -155,6 +171,55 @@ func copyField(
 			indentLevel,
 		)
 	}
+}
+
+func copyRemovedField(
+	from *model.Field,
+	hubImportAlias string,
+	varFrom string,
+	varTo string,
+	isCopyingFromHub bool,
+	indentLevel int,
+) string {
+	out := ""
+	indent := strings.Repeat("\t", indentLevel)
+	errVar := "err"
+	annotationKeyVar := "annotationKey"
+	annotationValueVar := "annotationValueVar"
+
+	if !isCopyingFromHub {
+		out += fmt.Sprintf(
+			"%s%s, %s, %s := AnnotateFieldData(\"%s\", %s)\n",
+			indent,
+			annotationKeyVar,
+			annotationValueVar,
+			errVar,
+			from.Names.Camel,
+			varFrom+"."+from.Names.Camel,
+		)
+		out += fmt.Sprintf("%sif err != nil {\n", indent)
+		out += fmt.Sprintf("%s\treturn err\n", indent)
+		out += fmt.Sprintf("%s}\n", indent)
+		out += fmt.Sprintf(
+			"%sobjectMetadataCopy.Annotations[%s] = %s\n",
+			indent,
+			annotationKeyVar,
+			annotationValueVar,
+		)
+	} else {
+		out += fmt.Sprintf(
+			"%s%s := DecodeFieldDataAnnotation(%s, %s)\n",
+			indent,
+			errVar,
+			"\"conversions.ack.aws.dev/"+from.Names.Camel+"\"",
+			varTo+"."+from.Names.Camel,
+		)
+		out += fmt.Sprintf("%sif err != nil {\n", indent)
+		out += fmt.Sprintf("%s\treturn err\n", indent)
+		out += fmt.Sprintf("%s}\n", indent)
+	}
+
+	return out
 }
 
 func copyScalar(
