@@ -5,13 +5,21 @@ package {{ .APIVersion }}
 {{ $hubImportAlias := .HubVersion }}
 
 import (
+    "encoding/json"
     "fmt"
 
-    ackrtwh "github.com/aws-controllers-k8s/runtime/pkg/webhook"
     ctrlrtconversion "sigs.k8s.io/controller-runtime/pkg/conversion"
-{{ if not .IsHub }}
+{{- if not .IsHub }}
+    ctrlrt "sigs.k8s.io/controller-runtime"
+    ackrtwh "github.com/aws-controllers-k8s/runtime/pkg/webhook"
+
     {{ $hubImportAlias }} "github.com/aws-controllers-k8s/{{ .ServiceIDClean }}-controller/apis/{{ .HubVersion }}"
 {{- end }}
+)
+
+var (
+    _ = fmt.Printf
+    _ = json.Marshal
 )
 
 {{- if .IsHub }}
@@ -29,20 +37,28 @@ func (src *{{ .SourceCRD.Kind }}) ConvertTo(dstRaw ctrlrtconversion.Hub) error {
 
 // ConvertFrom converts the Hub version ({{ .HubVersion }}) to this {{ .SourceCRD.Kind }}.
 func (dst *{{ .SourceCRD.Kind }}) ConvertFrom(srcRaw ctrlrtconversion.Hub) error {
-{{- GoCodeConvertTo .DestCRD .SourceCRD $hubImportAlias "dst" "srcRaw" 1}}
+{{- GoCodeConvertTo .SourceCRD .DestCRD $hubImportAlias "dst" "srcRaw" 1}}
+}
+
+func setupWebhookWithManager(mgr ctrlrt.Manager) error {
+	return ctrlrt.NewWebhookManagedBy(mgr).
+		For(&{{ .SourceCRD.Names.Camel }}{}).
+		Complete()
 }
 
 func init() {
-    webhook := ackrtwh.NewWebhook(
+    webhook := ackrtwh.New(
         "conversion",
         "{{ .SourceCRD.Names.Camel }}",
         "{{ $hubImportAlias }}",
+        setupWebhookWithManager,
     )
     if err := ackrtwh.RegisterWebhook(webhook); err != nil {
         msg := fmt.Sprintf("cannot register webhook: %v", err)
         panic(msg)
     }
 }
+
 
 // Assert convertible interface implementation {{ .SourceCRD.Names.Camel }}
 var _ ctrlrtconversion.Convertible = &{{ .SourceCRD.Names.Camel }}{}

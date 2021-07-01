@@ -460,8 +460,8 @@ func (r *CRD) GetResourceFieldRenames() (
 	if resourceConfig.Renames != nil && resourceConfig.Renames.Operations != nil {
 		opRenameConfigs := resourceConfig.Renames.Operations
 		for opName, opRenameConfigs := range opRenameConfigs {
-			for createOpName := range createOps {
-				if opName == createOpName {
+			for _, op := range createOps {
+				if opName == op.Name {
 					for old, new := range opRenameConfigs.InputFields {
 						oldToNewMap[old] = new
 						newToOldMap[new] = old

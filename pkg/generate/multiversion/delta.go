@@ -46,15 +46,17 @@ func ComputeCRDFieldsDeltas(crd1, crd2 *ackmodel.CRD) ([]FieldDelta, error) {
 
 	// if same aws-sdk-go and same generator.yaml return all intact
 
-	// visitedFields := map[string]struct{}{}
+	visitedFields := map[string]*struct{}{}
 
 	for _, specField1Name := range crd1.SpecFieldNames() {
 
 		specField1, _ := crd1.SpecFields[specField1Name]
 		specField2, ok := crd2.SpecFields[specField1Name]
 		// if field name stayed the same
-		// NOTE: carefull about A -> B then C -> A renames ?
+		// NOTE(a-hilaly): carefull about A -> B then C -> A renames ? IMO we should not allow it.
 		if ok {
+			visitedFields[specField1Name] = nil
+
 			if (specField1.FieldConfig != nil && !specField1.FieldConfig.IsSecret) &&
 				(specField2.FieldConfig != nil && specField2.FieldConfig.IsSecret) {
 				// field changed to secret
@@ -89,10 +91,18 @@ func ComputeCRDFieldsDeltas(crd1, crd2 *ackmodel.CRD) ([]FieldDelta, error) {
 			return nil, err
 		}
 
-		fmt.Println("renames:", oldToNewRenames2)
-
 		newName, ok := oldToNewRenames2[specField1Name]
 		if ok {
+			specField2, ok2 := crd2.SpecFields[newName]
+			if !ok2 {
+				// TODO(a-hilaly) explain error
+				return nil, fmt.Errorf("something is very wrong")
+			}
+			visitedFields[newName] = nil
+			visitedFields[specField1Name] = nil
+			// fmt.Println("setting visited:", newName, specField1Name)
+			// fmt.Println("field renamed from to", specField1Name, newName)
+
 			if newName == specField2.Names.Camel {
 				deltas = append(deltas, FieldDelta{
 					From:       specField1,
@@ -104,9 +114,24 @@ func ComputeCRDFieldsDeltas(crd1, crd2 *ackmodel.CRD) ([]FieldDelta, error) {
 			panic(fmt.Sprintf("renamed field unmatching: %v != %v", newName, specField2.Names.Camel))
 		}
 
-		// field probably deleted
+	}
+
+	vk := []string{}
+	for k := range visitedFields {
+		vk = append(vk, k)
+	}
+	// fmt.Println("going for another round", strings.Join(vk, ", "))
+
+	for _, specField2Name := range crd2.SpecFieldNames() {
+		_, visited := visitedFields[specField2Name]
+		// fmt.Println("visited:", specField2Name, visited)
+		if visited {
+			continue
+		}
+
+		specField2, _ := crd2.SpecFields[specField2Name]
 		deltas = append(deltas, FieldDelta{
-			From:       specField1,
+			From:       specField2,
 			To:         nil,
 			ChangeType: ChangeTypeRemoved,
 		})
@@ -115,6 +140,9 @@ func ComputeCRDFieldsDeltas(crd1, crd2 *ackmodel.CRD) ([]FieldDelta, error) {
 	return deltas, nil
 }
 
+// TODO(a-hilaly): this is very fragile - a simple docstring change will make the
+// result wrong
+// we'll need to slowly verify each member/key/value
 func isEqualShape(shapeRef1, shapeRef2 *awssdkmodel.ShapeRef) (bool, error) {
 	j1, err := json.Marshal(shapeRef1.Shape)
 	if err != nil {

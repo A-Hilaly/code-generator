@@ -89,7 +89,7 @@ func ConversionWebhooks(
 		}
 
 		for i, crd := range crds {
-			/* 			if spokeVersion == "v1" {
+			/* if spokeVersion == "v1" {
 				deltas, err := multiversion.ComputeCRDFieldsDeltas(crd, hubCRDs[i])
 				if err != nil {
 					return nil, err
