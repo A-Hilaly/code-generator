@@ -49,6 +49,7 @@ func ComputeCRDFieldsDeltas(crd1, crd2 *ackmodel.CRD) ([]FieldDelta, error) {
 	// visitedFields := map[string]struct{}{}
 
 	for _, specField1Name := range crd1.SpecFieldNames() {
+
 		specField1, _ := crd1.SpecFields[specField1Name]
 		specField2, ok := crd2.SpecFields[specField1Name]
 		// if field name stayed the same
@@ -87,6 +88,8 @@ func ComputeCRDFieldsDeltas(crd1, crd2 *ackmodel.CRD) ([]FieldDelta, error) {
 		if err != nil {
 			return nil, err
 		}
+
+		fmt.Println("renames:", oldToNewRenames2)
 
 		newName, ok := oldToNewRenames2[specField1Name]
 		if ok {

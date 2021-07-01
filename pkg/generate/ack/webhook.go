@@ -30,8 +30,8 @@ var (
 	}
 	webhookCopyPaths = []string{}
 	webhooksFuncMap  = ttpl.FuncMap{
-		"GoCodeConvertTo": func(src *ackmodel.CRD, dst *ackmodel.CRD, sourceVarName string, targetVarName string, indentLevel int) string {
-			return code.ConvertTo(src, dst, sourceVarName, targetVarName, indentLevel)
+		"GoCodeConvertTo": func(src *ackmodel.CRD, dst *ackmodel.CRD, hubImportPath string, sourceVarName string, targetVarName string, indentLevel int) string {
+			return code.ConvertTo(src, dst, hubImportPath, sourceVarName, targetVarName, indentLevel)
 		},
 	}
 )
