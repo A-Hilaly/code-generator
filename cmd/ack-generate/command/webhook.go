@@ -26,7 +26,11 @@ import (
 	"github.com/aws-controllers-k8s/code-generator/pkg/generate/multiversion"
 )
 
-var ()
+var (
+	optHubVersion              string
+	optDeprecatedVersions      []string
+	optEnableConversionWebhook bool
+)
 
 var webhooksCmd = &cobra.Command{
 	Use:   "webhooks <service>",
@@ -35,10 +39,19 @@ var webhooksCmd = &cobra.Command{
 }
 
 func init() {
+	webhooksCmd.PersistentFlags().StringVar(
+		&optHubVersion, "hub-version", "", "the hub version for conversion webhooks",
+	)
+	webhooksCmd.PersistentFlags().StringArrayVar(
+		&optDeprecatedVersions, "deprecated-versions", nil, "deprecated api versions",
+	)
+	webhooksCmd.PersistentFlags().BoolVar(
+		&optEnableConversionWebhook, "conversion-webhooks", false, "enable conversion webhooks generation",
+	)
 	rootCmd.AddCommand(webhooksCmd)
 }
 
-// generateWebhooks generates the Go files for a service controller
+// generateWebhooks generates the Go files for conversion, defaulting and validating webhooks.
 func generateWebhooks(cmd *cobra.Command, args []string) error {
 	if len(args) != 1 {
 		return fmt.Errorf("please specify the service alias for the AWS service API to generate")
@@ -66,44 +79,49 @@ func generateWebhooks(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	latestAPIVersion, err := getLatestAPIVersion()
-	//TODO custom hub version
+	if optHubVersion == "" {
+		latestAPIVersion, err := getLatestAPIVersion()
+		if err != nil {
+			return err
+		}
+		optHubVersion = latestAPIVersion
+	}
+
 	mvi, err := multiversion.New(
 		optCacheDir,
 		svcAlias,
-		latestAPIVersion,
+		optHubVersion,
 		apisInfos,
 		ack.DefaultConfig,
 	)
-
 	if err != nil {
 		return err
 	}
 
-	// if conversion/defaulting/validation webhooks enabled
-
-	ts, err := ackgenerate.ConversionWebhooks(mvi, optTemplateDirs)
-	if err != nil {
-		return err
-	}
-
-	if err = ts.Execute(); err != nil {
-		return err
-	}
-
-	for path, contents := range ts.Executed() {
-		if optDryRun {
-			fmt.Printf("============================= %s ======================================\n", path)
-			fmt.Println(strings.TrimSpace(contents.String()))
-			continue
-		}
-		outPath := filepath.Join(optOutputPath, path)
-		outDir := filepath.Dir(outPath)
-		if _, err := ensureDir(outDir); err != nil {
+	if optEnableConversionWebhook {
+		ts, err := ackgenerate.ConversionWebhooks(mvi, optTemplateDirs)
+		if err != nil {
 			return err
 		}
-		if err = ioutil.WriteFile(outPath, contents.Bytes(), 0666); err != nil {
+
+		if err = ts.Execute(); err != nil {
 			return err
+		}
+
+		for path, contents := range ts.Executed() {
+			if optDryRun {
+				fmt.Printf("============================= %s ======================================\n", path)
+				fmt.Println(strings.TrimSpace(contents.String()))
+				continue
+			}
+			outPath := filepath.Join(optOutputPath, path)
+			outDir := filepath.Dir(outPath)
+			if _, err := ensureDir(outDir); err != nil {
+				return err
+			}
+			if err = ioutil.WriteFile(outPath, contents.Bytes(), 0666); err != nil {
+				return err
+			}
 		}
 	}
 	return nil

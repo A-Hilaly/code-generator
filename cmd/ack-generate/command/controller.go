@@ -28,7 +28,6 @@ import (
 var (
 	cmdControllerPath string
 	pkgResourcePath   string
-	latestAPIVersion  string
 )
 
 // getLatestAPIVersion looks in a target output directory to determine what the
