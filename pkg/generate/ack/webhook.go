@@ -30,14 +30,31 @@ var (
 	}
 	webhookCopyPaths = []string{}
 	webhooksFuncMap  = ttpl.FuncMap{
-		"GoCodeConvertTo": func(src *ackmodel.CRD, dst *ackmodel.CRD, hubImportPath string, sourceVarName string, targetVarName string, indentLevel int) string {
+		"GoCodeConvertTo": func(
+			src *ackmodel.CRD,
+			dst *ackmodel.CRD,
+			hubImportPath string,
+			sourceVarName string,
+			targetVarName string,
+			indentLevel int,
+		) string {
 			return code.ConvertTo(src, dst, hubImportPath, sourceVarName, targetVarName, indentLevel)
+		},
+		"GoCodeConvertFrom": func(
+			src *ackmodel.CRD,
+			dst *ackmodel.CRD,
+			hubImportPath string,
+			sourceVarName string,
+			targetVarName string,
+			indentLevel int,
+		) string {
+			return code.ConvertFrom(src, dst, hubImportPath, sourceVarName, targetVarName, indentLevel)
 		},
 	}
 )
 
 // ConversionWebhooks returns a pointer to a TemplateSet containing all the templates
-// for generating ACK service conversion and defaulting webhooks
+// for generating conversion webhooks.
 func ConversionWebhooks(
 	mvi *multiversion.MultiVersionInferrer,
 	templateBasePaths []string,
@@ -48,7 +65,6 @@ func ConversionWebhooks(
 		webhookCopyPaths,
 		webhooksFuncMap,
 	)
-
 	hubVersion := mvi.GetHubVersion()
 	hubInferrer, err := mvi.GetInferrer(hubVersion)
 	if err != nil {
@@ -67,7 +83,7 @@ func ConversionWebhooks(
 			SourceCRD: crd,
 			IsHub:     true,
 		}
-
+		// Add the hub version template
 		target := fmt.Sprintf("apis/%s/convert.go", hubVersion)
 		if err = ts.Add(target, "apis/webhooks/conversion.go.tpl", convertVars); err != nil {
 			return nil, err
@@ -75,7 +91,7 @@ func ConversionWebhooks(
 		fmt.Println("added tmp", target)
 	}
 
-	// Generate spoke version conversion functions
+	// Add spoke version templates
 	for _, spokeVersion := range mvi.GetSpokeVersions() {
 		inferrer, err := mvi.GetInferrer(spokeVersion)
 		if err != nil {
@@ -89,18 +105,6 @@ func ConversionWebhooks(
 		}
 
 		for i, crd := range crds {
-			/* if spokeVersion == "v1" {
-				deltas, err := multiversion.ComputeCRDFieldsDeltas(crd, hubCRDs[i])
-				if err != nil {
-					return nil, err
-				}
-				fmt.Println("----\ndeltas:", len(deltas))
-				for _, delta := range deltas {
-					fmt.Println("changetype:", delta.ChangeType)
-				}
-				fmt.Println("----")
-			} */
-
 			convertVars := conversionVars{
 				MetaVars:   metaVars,
 				SourceCRD:  crd,
@@ -120,6 +124,8 @@ func ConversionWebhooks(
 	return ts, nil
 }
 
+// conversionVars contains template variables for templates that output
+// Go conversion functions.
 type conversionVars struct {
 	templateset.MetaVars
 	SourceCRD  *ackmodel.CRD
