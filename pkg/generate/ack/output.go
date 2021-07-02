@@ -145,6 +145,21 @@ func CreateGenerationMetadata(
 	return nil
 }
 
+func LoadGenerationMetadata(apisPath, apiVersion string) (*GenerationMetadata, error) {
+	filePath := filepath.Join(apisPath, apiVersion, outputFileName)
+	b, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	var generationMetadata GenerationMetadata
+	err = yaml.Unmarshal(b, &generationMetadata)
+	if err != nil {
+		return nil, err
+	}
+	return &generationMetadata, nil
+}
+
 // hashDirectoryContent returns the sha1 checksum of a given directory. It will walk
 // the file tree of a directory and combine and the file contents before hashing it.
 func hashDirectoryContent(directory string) (string, error) {

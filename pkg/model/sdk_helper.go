@@ -25,6 +25,7 @@ import (
 	"github.com/aws-controllers-k8s/code-generator/pkg/names"
 	"github.com/aws-controllers-k8s/code-generator/pkg/util"
 	awssdkmodel "github.com/aws/aws-sdk-go/private/model/api"
+	"gopkg.in/src-d/go-git.v4"
 )
 
 var (
@@ -46,6 +47,19 @@ type SDKHelper struct {
 	loader   *awssdkmodel.Loader
 	// Default is "services.k8s.aws"
 	APIGroupSuffix string
+}
+
+func LoadSDKAPI(
+	repo *git.Repository,
+	basePath string,
+	serviceAlias string,
+	awsSDKGoVersion string,
+) (*SDKAPI, error) {
+	err := util.CheckoutRepositoryTag(repo, awsSDKGoVersion)
+	if err != nil {
+		return nil, fmt.Errorf("cannot checkout repository tag %s: %v", serviceAlias, err)
+	}
+	return NewSDKHelper(basePath).API(serviceAlias)
 }
 
 // NewSDKHelper returns a new SDKHelper object

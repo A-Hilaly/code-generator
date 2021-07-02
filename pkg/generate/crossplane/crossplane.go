@@ -112,7 +112,7 @@ type templateCRDVars struct {
 // Crossplane returns a pointer to a TemplateSet containing all the templates for
 // generating Crossplane API types and controller code for an AWS service API
 func Crossplane(
-	g *generate.Generator,
+	g *generate.Inferrer,
 	templateBasePaths []string,
 ) (*templateset.TemplateSet, error) {
 	enumDefs, err := g.GetEnumDefs()

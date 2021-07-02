@@ -168,7 +168,11 @@ echo "Generating custom resource definitions for $SERVICE"
 # Latest version of controller-gen (master) is required for following two reasons
 # a) support for pointer values in map https://github.com/kubernetes-sigs/controller-tools/pull/317
 # b) support for float type (allowDangerousTypes) https://github.com/kubernetes-sigs/controller-tools/pull/449
-controller-gen crd:allowDangerousTypes=true paths=./... output:crd:artifacts:config=$config_output_dir/crd/bases
+echo --- $config_output_dir
+controller-gen \
+    crd:allowDangerousTypes=true \
+    crd:trivialVersions=false \
+    paths=./... output:crd:artifacts:config=/home/amine/source/github.com/aws-controllers-k8s/code-generator/scripts/lib/../../../ecr-controller/config/crd/bases
 
 popd 1>/dev/null
 

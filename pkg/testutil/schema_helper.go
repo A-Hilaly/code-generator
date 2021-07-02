@@ -24,7 +24,7 @@ import (
 	"github.com/aws-controllers-k8s/code-generator/pkg/model"
 )
 
-func NewGeneratorForService(t *testing.T, serviceAlias string) *generate.Generator {
+func NewGeneratorForService(t *testing.T, serviceAlias string) *generate.Inferrer {
 	path, _ := filepath.Abs("testdata")
 	// We have subdirectories in pkg/generate that rely on the testdata in
 	// pkg/generate. This code simply detects if we're running from one of

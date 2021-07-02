@@ -47,7 +47,7 @@ var (
 // Release returns a pointer to a TemplateSet containing all the templates for
 // generating an ACK service controller release (Helm artifacts, etc)
 func Release(
-	g *generate.Generator,
+	g *generate.Inferrer,
 	templateBasePaths []string,
 	// releaseVersion is the SemVer string describing the release that the Helm
 	// chart will install

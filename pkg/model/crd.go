@@ -236,6 +236,16 @@ func (r *CRD) SpecFieldNames() []string {
 	return res
 }
 
+// StatusFieldNames returns a sorted slice of field names for the Spec fields
+func (r *CRD) StatusFieldNames() []string {
+	res := make([]string, 0, len(r.StatusFields))
+	for fieldName := range r.StatusFields {
+		res = append(res, fieldName)
+	}
+	sort.Strings(res)
+	return res
+}
+
 // UnpacksAttributesMap returns true if the underlying API has
 // Get{Resource}Attributes/Set{Resource}Attributes API calls that map real,
 // schema'd fields to a raw `map[string]*string` for this resource (see SNS and
@@ -560,7 +570,7 @@ func (r *CRD) PrintAgeColumn() bool {
 }
 
 // ReconcileRequeuOnSuccessSeconds returns the duration after which to requeue
-// the custom resource as int, if specified in generator config. 
+// the custom resource as int, if specified in generator config.
 func (r *CRD) ReconcileRequeuOnSuccessSeconds() int {
 	if r.cfg == nil {
 		return 0
@@ -598,6 +608,39 @@ func (r *CRD) CustomUpdateMethodName() string {
 // check a corresponding value in the target Spec exists.
 func (r *CRD) ListOpMatchFieldNames() []string {
 	return r.cfg.ListOpMatchFieldNames(r.Names.Original)
+}
+
+func (r *CRD) GetResourceFieldRenames() (
+	map[string]string,
+	map[string]string,
+	error,
+) {
+	resourceConfig, ok := r.cfg.Resources[r.Names.Original]
+	if !ok {
+		return nil, nil, fmt.Errorf("resource not found")
+	}
+
+	oldToNewMap := make(map[string]string)
+	newToOldMap := make(map[string]string)
+
+	opMap := r.sdkAPI.GetOperationMap(r.cfg)
+	createOps := (*opMap)[OpTypeCreate]
+
+	if resourceConfig.Renames != nil && resourceConfig.Renames.Operations != nil {
+		opRenameConfigs := resourceConfig.Renames.Operations
+		for opName, opRenameConfigs := range opRenameConfigs {
+			for _, op := range createOps {
+				if opName == op.Name {
+					for old, new := range opRenameConfigs.InputFields {
+						oldToNewMap[old] = new
+						newToOldMap[new] = old
+					}
+				}
+			}
+		}
+	}
+
+	return oldToNewMap, newToOldMap, nil
 }
 
 // NewCRD returns a pointer to a new `ackmodel.CRD` struct that describes a
