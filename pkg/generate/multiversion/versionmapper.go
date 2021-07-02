@@ -24,13 +24,19 @@ import (
 	"github.com/aws-controllers-k8s/code-generator/pkg/util"
 )
 
+// APIInfo contains information related a specific apiVersion.
 type APIInfo struct {
-	IsDeprecated        bool
-	AWSSDKVersion       string
+	// Whether this API is deprecated or not. Deprecating a version
+	// prevents the code generator from generating webhooks for it.
+	IsDeprecated bool
+	// the aws-sdk-go version used to generated the apiVersion.
+	AWSSDKVersion string
+	// Full path of the generator config file.
 	GeneratorConfigPath string
 }
 
-type MultiVersionInferrer struct {
+// Inferrer .
+type Inferrer struct {
 	gitRepo *git.Repository
 
 	hubVersion    string
@@ -40,34 +46,28 @@ type MultiVersionInferrer struct {
 	inferrersMapping map[string]*generate.Inferrer
 }
 
-func (mvi *MultiVersionInferrer) WithHub(apiVersion string) *MultiVersionInferrer {
-	mvi.hubVersion = apiVersion
-	return mvi
-}
-
-func New(
+// NewInferrer .
+func NewInferrer(
 	sdkCacheDir string,
 	serviceAlias string,
 	hubVersion string,
 	apisInfo map[string]APIInfo,
 	defaultConfig ackgenconfig.Config,
-) (*MultiVersionInferrer, error) {
-
-	// compute the list of spokes versions
+) (*Inferrer, error) {
 	spokeVersions := make([]string, 0, len(apisInfo)-1)
-
-	rg, err := util.LoadRepository(sdkCacheDir)
+	gitRepo, err := util.LoadRepository(sdkCacheDir)
 	if err != nil {
-		return nil, fmt.Errorf("cannot load sdk cache: %v", err)
+		return nil, fmt.Errorf("cannot load sdk repository: %v", err)
 	}
 
+	// create inferrer for each non-deprecated api version
 	inferrersMapping := make(map[string]*generate.Inferrer, len(apisInfo))
 	for apiVersion, apiInfo := range apisInfo {
 		if apiVersion != hubVersion {
 			spokeVersions = append(spokeVersions, apiVersion)
 		}
 
-		SDKAPI, err := ackmodel.LoadSDKAPI(rg, sdkCacheDir, serviceAlias, apiInfo.AWSSDKVersion)
+		SDKAPI, err := ackmodel.LoadSDKAPI(gitRepo, sdkCacheDir, serviceAlias, apiInfo.AWSSDKVersion)
 		if err != nil {
 			return nil, fmt.Errorf("cannot load repository SDKAPI: %v", err)
 		}
@@ -84,42 +84,42 @@ func New(
 		inferrersMapping[apiVersion] = i
 	}
 
-	mvi := &MultiVersionInferrer{
-		gitRepo:          rg,
+	i := &Inferrer{
+		gitRepo:          gitRepo,
 		hubVersion:       hubVersion,
 		spokeVersions:    spokeVersions,
 		inferrersMapping: inferrersMapping,
 		apiInfos:         apisInfo,
 	}
 
-	return mvi, nil
+	return i, nil
 }
 
-func (mvi *MultiVersionInferrer) GetInferrer(apiVersion string) (*generate.Inferrer, error) {
-	if err := mvi.VerifyAPIVersions(apiVersion); err != nil {
+func (i *Inferrer) GetInferrer(apiVersion string) (*generate.Inferrer, error) {
+	if err := i.VerifyAPIVersions(apiVersion); err != nil {
 		return nil, fmt.Errorf("cannot verify apiVersions: %v", err)
 	}
-	return mvi.inferrersMapping[apiVersion], nil
+	return i.inferrersMapping[apiVersion], nil
 }
 
-func (mvi *MultiVersionInferrer) GetSpokeVersions() []string {
-	return mvi.spokeVersions
+func (i *Inferrer) GetSpokeVersions() []string {
+	return i.spokeVersions
 }
 
-func (mvi *MultiVersionInferrer) GetHubVersion() string {
-	return mvi.hubVersion
+func (i *Inferrer) GetHubVersion() string {
+	return i.hubVersion
 }
 
-func (mvi *MultiVersionInferrer) CompareHubWith(apiVersion string) ([]FieldDelta, error) {
-	return mvi.CompareAPIVersions(apiVersion, mvi.hubVersion)
+func (i *Inferrer) CompareHubWith(apiVersion string) ([]FieldDelta, error) {
+	return i.CompareAPIVersions(apiVersion, i.hubVersion)
 }
 
-func (mvi *MultiVersionInferrer) CompareAPIVersions(apiVersion1, apiVersion2 string) ([]FieldDelta, error) {
+func (i *Inferrer) CompareAPIVersions(apiVersion1, apiVersion2 string) ([]FieldDelta, error) {
 	if apiVersion1 == apiVersion2 {
 		return nil, fmt.Errorf("cannot compare an apiVersion with it self")
 	}
 
-	err := mvi.VerifyAPIVersions(apiVersion1, apiVersion2)
+	err := i.VerifyAPIVersions(apiVersion1, apiVersion2)
 	if err != nil {
 		return nil, fmt.Errorf("cannot verify apiVersions: %v", err)
 	}
@@ -127,9 +127,9 @@ func (mvi *MultiVersionInferrer) CompareAPIVersions(apiVersion1, apiVersion2 str
 	return nil, nil
 }
 
-func (mvi *MultiVersionInferrer) VerifyAPIVersions(apiVersions ...string) error {
+func (i *Inferrer) VerifyAPIVersions(apiVersions ...string) error {
 	for _, apiVersion := range apiVersions {
-		apiInfo, ok := mvi.apiInfos[apiVersion]
+		apiInfo, ok := i.apiInfos[apiVersion]
 		if !ok {
 			return fmt.Errorf("cannot find apiVersion %s", apiVersion)
 		}

@@ -87,7 +87,7 @@ func generateWebhooks(cmd *cobra.Command, args []string) error {
 		optHubVersion = latestAPIVersion
 	}
 
-	mvi, err := multiversion.New(
+	mvi, err := multiversion.NewInferrer(
 		optCacheDir,
 		svcAlias,
 		optHubVersion,

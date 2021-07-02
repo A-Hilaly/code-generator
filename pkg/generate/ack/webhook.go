@@ -56,7 +56,7 @@ var (
 // ConversionWebhooks returns a pointer to a TemplateSet containing all the templates
 // for generating conversion webhooks.
 func ConversionWebhooks(
-	mvi *multiversion.MultiVersionInferrer,
+	mvInferrer *multiversion.Inferrer,
 	templateBasePaths []string,
 ) (*templateset.TemplateSet, error) {
 	ts := templateset.New(
@@ -65,8 +65,8 @@ func ConversionWebhooks(
 		webhookCopyPaths,
 		webhooksFuncMap,
 	)
-	hubVersion := mvi.GetHubVersion()
-	hubInferrer, err := mvi.GetInferrer(hubVersion)
+	hubVersion := mvInferrer.GetHubVersion()
+	hubInferrer, err := mvInferrer.GetInferrer(hubVersion)
 	if err != nil {
 		return nil, err
 	}
@@ -88,12 +88,11 @@ func ConversionWebhooks(
 		if err = ts.Add(target, "apis/webhooks/conversion.go.tpl", convertVars); err != nil {
 			return nil, err
 		}
-		fmt.Println("added tmp", target)
 	}
 
 	// Add spoke version templates
-	for _, spokeVersion := range mvi.GetSpokeVersions() {
-		inferrer, err := mvi.GetInferrer(spokeVersion)
+	for _, spokeVersion := range mvInferrer.GetSpokeVersions() {
+		inferrer, err := mvInferrer.GetInferrer(spokeVersion)
 		if err != nil {
 			return nil, err
 		}
@@ -117,7 +116,6 @@ func ConversionWebhooks(
 			if err = ts.Add(target, "apis/webhooks/conversion.go.tpl", convertVars); err != nil {
 				return nil, err
 			}
-			fmt.Println("added tmp", target)
 		}
 	}
 
