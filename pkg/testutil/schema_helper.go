@@ -25,6 +25,10 @@ import (
 )
 
 func NewInferrerForService(t *testing.T, serviceAlias string) *generate.Inferrer {
+	return NewInferrerForServiceWithGeneratorConfig(t, serviceAlias, "generator.yaml")
+}
+
+func NewInferrerForServiceWithGeneratorConfig(t *testing.T, serviceAlias string, generatorConfigFile string) *generate.Inferrer {
 	path, _ := filepath.Abs("testdata")
 	// We have subdirectories in pkg/generate that rely on the testdata in
 	// pkg/generate. This code simply detects if we're running from one of
@@ -43,7 +47,7 @@ func NewInferrerForService(t *testing.T, serviceAlias string) *generate.Inferrer
 	if err != nil {
 		t.Fatal(err)
 	}
-	generatorConfigPath := filepath.Join(path, "models", "apis", serviceAlias, "0000-00-00", "generator.yaml")
+	generatorConfigPath := filepath.Join(path, "models", "apis", serviceAlias, "0000-00-00", generatorConfigFile)
 	if _, err := os.Stat(generatorConfigPath); os.IsNotExist(err) {
 		generatorConfigPath = ""
 	}

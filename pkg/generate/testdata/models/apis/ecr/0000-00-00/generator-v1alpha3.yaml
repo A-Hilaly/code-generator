@@ -1,0 +1,28 @@
+resources:
+  Repository:
+    renames:
+      operations:
+        CreateRepository:
+          input_fields:
+            RepositoryName: Name
+            ImageTagMutability: ITM
+        DescribeRepository:
+          input_fields:
+            ImageTagMutability: ITM
+        DeleteRepository:
+          input_fields:
+            RepositoryName: Name
+            ImageTagMutability: ITM
+        DescribeRepositories:
+          input_fields:
+            RepositoryName: Name
+            ImageTagMutability: ITM
+    exceptions:
+      errors:
+        404:
+          code: RepositoryNotFoundException
+    list_operation:
+      match_fields:
+        - Name
+    update_operation:
+      custom_method_name: customUpdateRepository
