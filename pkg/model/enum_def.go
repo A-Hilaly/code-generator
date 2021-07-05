@@ -15,7 +15,10 @@ package model
 
 import (
 	"bytes"
+	"fmt"
+	"sort"
 
+	ackgenconfig "github.com/aws-controllers-k8s/code-generator/pkg/generate/config"
 	"github.com/aws-controllers-k8s/code-generator/pkg/names"
 )
 
@@ -55,4 +58,32 @@ func newEnumVal(orig string) EnumValue {
 		Original: orig,
 		Clean:    string(clean),
 	}
+}
+
+// GetEnumDefs takes an *SDKAPI and *ackgenconfig.Config and returns a slice of
+// pointers to `EnumDef` structs which represent string fields whose value is
+// constrained to one or more specific string values.
+func GetEnumDefs(SDKAPI *SDKAPI, cfg *ackgenconfig.Config) ([]*EnumDef, error) {
+	edefs := []*EnumDef{}
+
+	for shapeName, shape := range SDKAPI.API.Shapes {
+		if !shape.IsEnum() {
+			continue
+		}
+		enumNames := names.New(shapeName)
+		// Handle name conflicts with top-level CRD.Spec or CRD.Status
+		// types
+		if SDKAPI.HasConflictingTypeName(shapeName, cfg) {
+			enumNames.Camel += ConflictingNameSuffix
+		}
+		edef, err := NewEnumDef(enumNames, shape.Enum)
+		if err != nil {
+			return nil, fmt.Errorf("cannot create enum def %s: %v", enumNames.Camel, err)
+		}
+		edefs = append(edefs, edef)
+	}
+	sort.Slice(edefs, func(i, j int) bool {
+		return edefs[i].Names.Camel < edefs[j].Names.Camel
+	})
+	return edefs, nil
 }
