@@ -45,7 +45,8 @@ type APIInfo struct {
 }
 
 // Inferrer is a multi-version aware inferrer. It is containing the mapping
-// of each non-deprecated version with their correspending inferrer and APIInfos.
+// of each non-deprecated version with their correspending generate.inferrer
+// and APIInfos.
 type Inferrer struct {
 	gitRepo *git.Repository
 
@@ -106,18 +107,18 @@ func NewInferrer(
 	sort.Strings(spokeVersions)
 	sort.Strings(deprecatedVersions)
 
-	if err := auditDeprecations(hubVersion, spokeVersions, deprecatedVersions); err != nil {
-		return nil, err
-	}
-
-	return &Inferrer{
+	inferrer := &Inferrer{
 		gitRepo:            gitRepo,
 		hubVersion:         hubVersion,
 		spokeVersions:      spokeVersions,
 		deprecatedVersions: deprecatedVersions,
 		apiInfos:           apisInfo,
 		inferrersMapping:   inferrersMapping,
-	}, nil
+	}
+	if err := inferrer.auditDeprecations(); err != nil {
+		return nil, err
+	}
+	return inferrer, nil
 }
 
 // GetInferrer returns the inferrer of a given api version.
@@ -204,19 +205,72 @@ func (i *Inferrer) VerifyAPIVersions(apiVersions ...string) error {
 	return nil
 }
 
+// isDeprecated returns whether a version is deprecated or not.
+func (i *Inferrer) isDeprecated(apiVersion string) bool {
+	return util.InStrings(apiVersion, i.deprecatedVersions)
+}
+
 // auditDeprecations verifies that the list of deprecations doesn't break any of the
 // kubernetes deprecation policies.
-func auditDeprecations(
-	hubVersion string,
-	spokeVersions []string,
-	deprecatedVersions []string,
-) error {
-	// First we can not deprecated the hub version.
-	if util.InStrings(hubVersion, deprecatedVersions) {
-		return fmt.Errorf("%v: %s", ErrIllegalDeprecation, hubVersion)
+func (i *Inferrer) auditDeprecations() error {
+	// First we can not deprecate the hub version.
+	if util.InStrings(i.hubVersion, i.deprecatedVersions) {
+		return fmt.Errorf("%v: %s", ErrIllegalDeprecation, i.hubVersion)
+	}
+	// We can not deprecate a version that doesn't exist
+	for _, deprecatedVersion := range i.deprecatedVersions {
+		if !util.InStrings(deprecatedVersion, i.spokeVersions) {
+			return fmt.Errorf("%v: %s", ErrAPIVersionNotFound, i.hubVersion)
+		}
 	}
 
-	// TODO(a-hilaly): make sure that deprecation is incremental. For example you can't
-	// deprecate v1alpha2 without deprecating v1alpha1
+	// Next we should verify that deprecation is incremental. For example you cannot
+	// deprecate v1alpha2 without deprecating v1alpha1, but you can deprecate v1beta1
+	// without deprecating v1alpha1
+	apiSets, err := getAPISets(i.spokeVersions)
+	if err != nil {
+		return fmt.Errorf("cannot read api sets: %v", err)
+	}
+
+	apiMajorVersions := make([]int, 0, len(apiSets))
+	for k := range apiSets {
+		apiMajorVersions = append(apiMajorVersions, k)
+	}
+	sort.Ints(apiMajorVersions)
+
+	for _, majorVersion := range apiMajorVersions {
+		apiSet := apiSets[majorVersion]
+		// audit apiSet
+
+		// if the first apiVersion is not deprecated then none of the following versions
+		// should be.
+		err = i.auditMinorVersions(apiSet.alphas)
+		if err != nil {
+			return fmt.Errorf("alpha deprecation policy error: %v", err)
+		}
+		err = i.auditMinorVersions(apiSet.betas)
+		if err != nil {
+			return fmt.Errorf("beta deprecation policy error: %v", err)
+		}
+	}
+
+	return nil
+}
+
+func (i *Inferrer) auditMinorVersions(versions []string) error {
+	if len(versions) <= 1 {
+		return nil
+	}
+
+	lastVersion := versions[0]
+	isLastDeprecated := i.isDeprecated(versions[0])
+	for _, version := range versions[1:] {
+		isCurrentDeprecated := i.isDeprecated(version)
+		if !isLastDeprecated && isCurrentDeprecated {
+			return fmt.Errorf("cannot deprecated %s before deprecating %s", version, lastVersion)
+		}
+		lastVersion = version
+		isLastDeprecated = isCurrentDeprecated
+	}
 	return nil
 }
