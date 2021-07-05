@@ -26,14 +26,14 @@ func TestAPIGatewayV2_GetTypeDefs(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "apigatewayv2")
+	i := testutil.NewInferrerForService(t, "apigatewayv2")
 
 	// There is an "Api" Shape that is a struct that is an element of the
 	// GetApis Operation. Its name conflicts with the CRD called API and thus
 	// we need to check that its cleaned name is set to API_SDK (the _SDK
 	// suffix is appended to the type name to avoid the conflict with
 	// CRD-specific structs.
-	tdef := testutil.GetTypeDefByName(t, g, "Api")
+	tdef := testutil.GetTypeDefByName(t, i, "Api")
 	require.NotNil(tdef)
 
 	assert.Equal("API_SDK", tdef.Names.Camel)
@@ -43,9 +43,9 @@ func TestAPIGatewayV2_Api(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "apigatewayv2")
+	i := testutil.NewInferrerForService(t, "apigatewayv2")
 
-	crds, err := g.GetCRDs()
+	crds, err := i.GetCRDs()
 	require.Nil(err)
 
 	crd := getCRDByName("Api", crds)
@@ -71,9 +71,9 @@ func TestAPIGatewayV2_Route(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "apigatewayv2")
+	i := testutil.NewInferrerForService(t, "apigatewayv2")
 
-	crds, err := g.GetCRDs()
+	crds, err := i.GetCRDs()
 	require.Nil(err)
 
 	crd := getCRDByName("Route", crds)

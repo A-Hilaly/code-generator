@@ -118,15 +118,15 @@ var (
 // Controller returns a pointer to a TemplateSet containing all the templates
 // for generating ACK service controller implementations
 func Controller(
-	g *generate.Generator,
+	inferrer *generate.Inferrer,
 	templateBasePaths []string,
 ) (*templateset.TemplateSet, error) {
-	crds, err := g.GetCRDs()
+	crds, err := inferrer.GetCRDs()
 	if err != nil {
 		return nil, err
 	}
 
-	metaVars := g.MetaVars()
+	metaVars := inferrer.MetaVars()
 
 	// Hook code can reference a template path, and we can look up the template
 	// in any of our base paths...
@@ -176,7 +176,7 @@ func Controller(
 
 	configVars := &templateConfigVars{
 		metaVars,
-		g.GetConfig(),
+		inferrer.GetConfig(),
 	}
 	if err = ts.Add("pkg/resource/registry.go", "pkg/resource/registry.go.tpl", configVars); err != nil {
 		return nil, err

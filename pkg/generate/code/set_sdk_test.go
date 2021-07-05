@@ -28,9 +28,9 @@ func TestSetSDK_APIGWv2_Route_Create(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "apigatewayv2")
+	i := testutil.NewInferrerForService(t, "apigatewayv2")
 
-	crd := testutil.GetCRDByName(t, g, "Route")
+	crd := testutil.GetCRDByName(t, i, "Route")
 	require.NotNil(crd)
 
 	expected := `
@@ -101,9 +101,9 @@ func TestSetSDK_DynamoDB_Table_Create(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "dynamodb")
+	i := testutil.NewInferrerForService(t, "dynamodb")
 
-	crd := testutil.GetCRDByName(t, g, "Table")
+	crd := testutil.GetCRDByName(t, i, "Table")
 	require.NotNil(crd)
 
 	expected := `
@@ -291,9 +291,9 @@ func TestSetSDK_EC2_LaunchTemplate_Create(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "ec2")
+	i := testutil.NewInferrerForService(t, "ec2")
 
-	crd := testutil.GetCRDByName(t, g, "LaunchTemplate")
+	crd := testutil.GetCRDByName(t, i, "LaunchTemplate")
 	require.NotNil(crd)
 
 	// LaunchTemplateName is in the LaunchTemplate resource's CreateTopicInput shape and also
@@ -695,9 +695,9 @@ func TestSetSDK_ECR_Repository_Create(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "ecr")
+	i := testutil.NewInferrerForService(t, "ecr")
 
-	crd := testutil.GetCRDByName(t, g, "Repository")
+	crd := testutil.GetCRDByName(t, i, "Repository")
 	require.NotNil(crd)
 
 	// ImageScanningConfiguration is in the Repository resource's
@@ -743,9 +743,9 @@ func TestSetSDK_Elasticache_ReplicationGroup_Create(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "elasticache")
+	i := testutil.NewInferrerForService(t, "elasticache")
 
-	crd := testutil.GetCRDByName(t, g, "ReplicationGroup")
+	crd := testutil.GetCRDByName(t, i, "ReplicationGroup")
 	require.NotNil(crd)
 
 	expected := `
@@ -976,9 +976,9 @@ func TestSetSDK_Elasticache_ReplicationGroup_ReadMany(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "elasticache")
+	i := testutil.NewInferrerForService(t, "elasticache")
 
-	crd := testutil.GetCRDByName(t, g, "ReplicationGroup")
+	crd := testutil.GetCRDByName(t, i, "ReplicationGroup")
 	require.NotNil(crd)
 
 	// Elasticache doesn't have a ReadOne operation; only a List/ReadMany
@@ -1000,9 +1000,9 @@ func TestSetSDK_Elasticache_ReplicationGroup_Update_Override_Values(t *testing.T
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "elasticache")
+	i := testutil.NewInferrerForService(t, "elasticache")
 
-	crd := testutil.GetCRDByName(t, g, "ReplicationGroup")
+	crd := testutil.GetCRDByName(t, i, "ReplicationGroup")
 	require.NotNil(crd)
 
 	expected := `
@@ -1113,9 +1113,9 @@ func TestSetSDK_Elasticache_User_Create_Override_Values(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "elasticache")
+	i := testutil.NewInferrerForService(t, "elasticache")
 
-	crd := testutil.GetCRDByName(t, g, "User")
+	crd := testutil.GetCRDByName(t, i, "User")
 	require.NotNil(crd)
 
 	expected := `
@@ -1156,9 +1156,9 @@ func TestSetSDK_RDS_DBInstance_Create(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "rds")
+	i := testutil.NewInferrerForService(t, "rds")
 
-	crd := testutil.GetCRDByName(t, g, "DBInstance")
+	crd := testutil.GetCRDByName(t, i, "DBInstance")
 	require.NotNil(crd)
 
 	expected := `
@@ -1351,9 +1351,9 @@ func TestSetSDK_S3_Bucket_Create(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "s3")
+	i := testutil.NewInferrerForService(t, "s3")
 
-	crd := testutil.GetCRDByName(t, g, "Bucket")
+	crd := testutil.GetCRDByName(t, i, "Bucket")
 	require.NotNil(crd)
 
 	expected := `
@@ -1399,9 +1399,9 @@ func TestSetSDK_S3_Bucket_Delete(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "s3")
+	i := testutil.NewInferrerForService(t, "s3")
 
-	crd := testutil.GetCRDByName(t, g, "Bucket")
+	crd := testutil.GetCRDByName(t, i, "Bucket")
 	require.NotNil(crd)
 
 	expected := `
@@ -1419,9 +1419,9 @@ func TestSetSDK_SNS_Topic_Create(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "sns")
+	i := testutil.NewInferrerForService(t, "sns")
 
-	crd := testutil.GetCRDByName(t, g, "Topic")
+	crd := testutil.GetCRDByName(t, i, "Topic")
 	require.NotNil(crd)
 
 	// The input shape for the Create operation is set from a variety of scalar
@@ -1471,9 +1471,9 @@ func TestSetSDK_SNS_Topic_GetAttributes(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "sns")
+	i := testutil.NewInferrerForService(t, "sns")
 
-	crd := testutil.GetCRDByName(t, g, "Topic")
+	crd := testutil.GetCRDByName(t, i, "Topic")
 	require.NotNil(crd)
 
 	// The input shape for the GetAttributes operation has a single TopicArn
@@ -1497,9 +1497,9 @@ func TestSetSDK_SQS_Queue_Create(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "sqs")
+	i := testutil.NewInferrerForService(t, "sqs")
 
-	crd := testutil.GetCRDByName(t, g, "Queue")
+	crd := testutil.GetCRDByName(t, i, "Queue")
 	require.NotNil(crd)
 
 	expected := `
@@ -1561,9 +1561,9 @@ func TestSetSDK_SQS_Queue_GetAttributes(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "sqs")
+	i := testutil.NewInferrerForService(t, "sqs")
 
-	crd := testutil.GetCRDByName(t, g, "Queue")
+	crd := testutil.GetCRDByName(t, i, "Queue")
 	require.NotNil(crd)
 
 	// The input shape for the GetAttributes operation technically has two
@@ -1591,9 +1591,9 @@ func TestSetSDK_MQ_Broker_Create(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "mq")
+	i := testutil.NewInferrerForService(t, "mq")
 
-	crd := testutil.GetCRDByName(t, g, "Broker")
+	crd := testutil.GetCRDByName(t, i, "Broker")
 	require.NotNil(crd)
 
 	expected := `

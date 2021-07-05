@@ -29,9 +29,9 @@ func TestCheckRequiredFields_Attributes_ARNField(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "sns")
+	i := testutil.NewInferrerForService(t, "sns")
 
-	crd := testutil.GetCRDByName(t, g, "Topic")
+	crd := testutil.GetCRDByName(t, i, "Topic")
 	require.NotNil(crd)
 
 	// The Go code for checking the GetTopicAttributes Input shape's required
@@ -57,9 +57,9 @@ func TestCheckRequiredFields_Attributes_StatusField(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "sqs")
+	i := testutil.NewInferrerForService(t, "sqs")
 
-	crd := testutil.GetCRDByName(t, g, "Queue")
+	crd := testutil.GetCRDByName(t, i, "Queue")
 	require.NotNil(crd)
 
 	expRequiredFieldsCode := `
@@ -78,9 +78,9 @@ func TestCheckRequiredFields_Attributes_StatusAndSpecField(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "apigatewayv2")
+	i := testutil.NewInferrerForService(t, "apigatewayv2")
 
-	crd := testutil.GetCRDByName(t, g, "Route")
+	crd := testutil.GetCRDByName(t, i, "Route")
 	require.NotNil(crd)
 
 	expRequiredFieldsCode := `
@@ -99,9 +99,9 @@ func TestCheckRequiredFields_RenamedSpecField(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "eks")
+	i := testutil.NewInferrerForService(t, "eks")
 
-	crd := testutil.GetCRDByName(t, g, "FargateProfile")
+	crd := testutil.GetCRDByName(t, i, "FargateProfile")
 	require.NotNil(crd)
 
 	expRequiredFieldsCode := `

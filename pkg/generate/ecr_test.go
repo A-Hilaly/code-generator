@@ -26,9 +26,9 @@ func TestECRRepository(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "ecr")
+	i := testutil.NewInferrerForService(t, "ecr")
 
-	crds, err := g.GetCRDs()
+	crds, err := i.GetCRDs()
 	require.Nil(err)
 
 	crd := getCRDByName("Repository", crds)

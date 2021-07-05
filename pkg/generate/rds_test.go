@@ -26,9 +26,9 @@ func TestRDS_DBInstance(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "rds")
+	i := testutil.NewInferrerForService(t, "rds")
 
-	crds, err := g.GetCRDs()
+	crds, err := i.GetCRDs()
 	require.Nil(err)
 
 	crd := getCRDByName("DBInstance", crds)

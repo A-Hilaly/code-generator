@@ -26,9 +26,9 @@ func TestDynamoDB_Table(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "dynamodb")
+	i := testutil.NewInferrerForService(t, "dynamodb")
 
-	crds, err := g.GetCRDs()
+	crds, err := i.GetCRDs()
 	require.Nil(err)
 
 	crd := getCRDByName("Table", crds)

@@ -39,7 +39,7 @@ var (
 // BundleAssets generates the assets necessary to generate
 // a bundle used for deploying a service via OLM.
 func BundleAssets(
-	g *generate.Generator,
+	inferrer *generate.Inferrer,
 	commonMeta CommonMetadata,
 	serviceConfig ServiceConfig,
 	vers string,
@@ -53,7 +53,7 @@ func BundleAssets(
 		csvFuncMap,
 	)
 
-	crds, err := g.GetCRDs()
+	crds, err := inferrer.GetCRDs()
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +61,7 @@ func BundleAssets(
 	olmVars := templateOLMVars{
 		vers,
 		time.Now().Format("2006-01-02 15:04:05"),
-		g.MetaVars(),
+		inferrer.MetaVars(),
 		commonMeta,
 		serviceConfig,
 		crds,
@@ -80,7 +80,7 @@ func BundleAssets(
 
 	csvBaseOutPath := fmt.Sprintf(
 		"config/manifests/bases/ack-%s-controller.clusterserviceversion.yaml",
-		g.MetaVars().ServiceIDClean)
+		inferrer.MetaVars().ServiceIDClean)
 	if err := ts.Add(csvBaseOutPath, "config/manifests/bases/clusterserviceversion.yaml.tpl", olmVars); err != nil {
 		return nil, err
 	}

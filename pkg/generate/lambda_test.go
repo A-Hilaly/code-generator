@@ -26,9 +26,9 @@ func TestLambda_Function(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "lambda")
+	i := testutil.NewInferrerForService(t, "lambda")
 
-	crds, err := g.GetCRDs()
+	crds, err := i.GetCRDs()
 	require.Nil(err)
 
 	crd := getCRDByName("Function", crds)

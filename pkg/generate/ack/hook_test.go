@@ -31,9 +31,9 @@ func TestResourceHookCodeInline(t *testing.T) {
 	basePaths := []string{}
 	hookID := "sdk_update_pre_build_request"
 
-	g := testutil.NewGeneratorForService(t, "mq")
+	i := testutil.NewInferrerForService(t, "mq")
 
-	crd := testutil.GetCRDByName(t, g, "Broker")
+	crd := testutil.GetCRDByName(t, i, "Broker")
 	require.NotNil(crd)
 
 	// The Broker's update operation has a special hook callback configured
@@ -52,9 +52,9 @@ func TestResourceHookCodeTemplatePath(t *testing.T) {
 	}
 	hookID := "sdk_delete_pre_build_request"
 
-	g := testutil.NewGeneratorForService(t, "mq")
+	i := testutil.NewInferrerForService(t, "mq")
 
-	crd := testutil.GetCRDByName(t, g, "Broker")
+	crd := testutil.GetCRDByName(t, i, "Broker")
 	require.NotNil(crd)
 
 	// The Broker's delete operation has a special hook configured to point to a template.

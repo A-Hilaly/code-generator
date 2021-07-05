@@ -30,9 +30,9 @@ func TestSetResource_APIGWv2_Route_Create(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "apigatewayv2")
+	i := testutil.NewInferrerForService(t, "apigatewayv2")
 
-	crd := testutil.GetCRDByName(t, g, "Route")
+	crd := testutil.GetCRDByName(t, i, "Route")
 	require.NotNil(crd)
 
 	expected := `
@@ -57,9 +57,9 @@ func TestSetResource_APIGWv2_Route_ReadOne(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "apigatewayv2")
+	i := testutil.NewInferrerForService(t, "apigatewayv2")
 
-	crd := testutil.GetCRDByName(t, g, "Route")
+	crd := testutil.GetCRDByName(t, i, "Route")
 	require.NotNil(crd)
 
 	expected := `
@@ -159,9 +159,9 @@ func TestSetResource_DynamoDB_Backup_ReadOne(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "dynamodb")
+	i := testutil.NewInferrerForService(t, "dynamodb")
 
-	crd := testutil.GetCRDByName(t, g, "Backup")
+	crd := testutil.GetCRDByName(t, i, "Backup")
 	require.NotNil(crd)
 
 	expected := `
@@ -213,9 +213,9 @@ func TestSetResource_CodeDeploy_Deployment_Create(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "codedeploy")
+	i := testutil.NewInferrerForService(t, "codedeploy")
 
-	crd := testutil.GetCRDByName(t, g, "Deployment")
+	crd := testutil.GetCRDByName(t, i, "Deployment")
 	require.NotNil(crd)
 
 	// However, all of the fields in the Deployment resource's
@@ -239,9 +239,9 @@ func TestSetResource_DynamoDB_Table_ReadOne(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "dynamodb")
+	i := testutil.NewInferrerForService(t, "dynamodb")
 
-	crd := testutil.GetCRDByName(t, g, "Table")
+	crd := testutil.GetCRDByName(t, i, "Table")
 	require.NotNil(crd)
 
 	// The DynamoDB API uses an API that uses "wrapper" single-member objects
@@ -587,9 +587,9 @@ func TestSetResource_EC2_LaunchTemplate_Create(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "ec2")
+	i := testutil.NewInferrerForService(t, "ec2")
 
-	crd := testutil.GetCRDByName(t, g, "LaunchTemplate")
+	crd := testutil.GetCRDByName(t, i, "LaunchTemplate")
 	require.NotNil(crd)
 
 	// Check that we properly determined how to find the CreatedBy attribute
@@ -648,9 +648,9 @@ func TestSetResource_ECR_Repository_Create(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "ecr")
+	i := testutil.NewInferrerForService(t, "ecr")
 
-	crd := testutil.GetCRDByName(t, g, "Repository")
+	crd := testutil.GetCRDByName(t, i, "Repository")
 	require.NotNil(crd)
 
 	// Check that we properly determined how to find the RegistryID attribute
@@ -690,9 +690,9 @@ func TestSetResource_ECR_Repository_ReadMany(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "ecr")
+	i := testutil.NewInferrerForService(t, "ecr")
 
-	crd := testutil.GetCRDByName(t, g, "Repository")
+	crd := testutil.GetCRDByName(t, i, "Repository")
 	require.NotNil(crd)
 
 	// Check that the DescribeRepositories output is filtered by the
@@ -766,9 +766,9 @@ func TestSetResource_Elasticache_ReplicationGroup_Create(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "elasticache")
+	i := testutil.NewInferrerForService(t, "elasticache")
 
-	crd := testutil.GetCRDByName(t, g, "ReplicationGroup")
+	crd := testutil.GetCRDByName(t, i, "ReplicationGroup")
 	require.NotNil(crd)
 
 	expected := `
@@ -1031,9 +1031,9 @@ func TestSetResource_Elasticache_ReplicationGroup_ReadMany(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "elasticache")
+	i := testutil.NewInferrerForService(t, "elasticache")
 
-	crd := testutil.GetCRDByName(t, g, "ReplicationGroup")
+	crd := testutil.GetCRDByName(t, i, "ReplicationGroup")
 	require.NotNil(crd)
 
 	expected := `
@@ -1387,9 +1387,9 @@ func TestSetResource_RDS_DBInstance_Create(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "rds")
+	i := testutil.NewInferrerForService(t, "rds")
 
-	crd := testutil.GetCRDByName(t, g, "DBInstance")
+	crd := testutil.GetCRDByName(t, i, "DBInstance")
 	require.NotNil(crd)
 
 	expected := `
@@ -1770,9 +1770,9 @@ func TestSetResource_RDS_DBInstance_ReadMany(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "rds")
+	i := testutil.NewInferrerForService(t, "rds")
 
-	crd := testutil.GetCRDByName(t, g, "DBInstance")
+	crd := testutil.GetCRDByName(t, i, "DBInstance")
 	require.NotNil(crd)
 
 	// This asserts that the fields of the Spec and Status structs of the
@@ -2335,9 +2335,9 @@ func TestSetResource_S3_Bucket_Create(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "s3")
+	i := testutil.NewInferrerForService(t, "s3")
 
-	crd := testutil.GetCRDByName(t, g, "Bucket")
+	crd := testutil.GetCRDByName(t, i, "Bucket")
 	require.NotNil(crd)
 
 	expected := `
@@ -2357,9 +2357,9 @@ func TestSetResource_S3_Bucket_ReadMany(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "s3")
+	i := testutil.NewInferrerForService(t, "s3")
 
-	crd := testutil.GetCRDByName(t, g, "Bucket")
+	crd := testutil.GetCRDByName(t, i, "Bucket")
 	require.NotNil(crd)
 
 	expected := `
@@ -2392,9 +2392,9 @@ func TestSetResource_SNS_Topic_Create(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "sns")
+	i := testutil.NewInferrerForService(t, "sns")
 
-	crd := testutil.GetCRDByName(t, g, "Topic")
+	crd := testutil.GetCRDByName(t, i, "Topic")
 	require.NotNil(crd)
 
 	// None of the fields in the Topic resource's CreateTopicInput shape are
@@ -2422,9 +2422,9 @@ func TestSetResource_SNS_Topic_GetAttributes(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "sns")
+	i := testutil.NewInferrerForService(t, "sns")
 
-	crd := testutil.GetCRDByName(t, g, "Topic")
+	crd := testutil.GetCRDByName(t, i, "Topic")
 	require.NotNil(crd)
 
 	// The output shape for the GetAttributes operation contains a single field
@@ -2452,9 +2452,9 @@ func TestSetResource_SQS_Queue_Create(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "sqs")
+	i := testutil.NewInferrerForService(t, "sqs")
 
-	crd := testutil.GetCRDByName(t, g, "Queue")
+	crd := testutil.GetCRDByName(t, i, "Queue")
 	require.NotNil(crd)
 
 	// There are no fields other than QueueID in the returned CreateQueueResult
@@ -2476,9 +2476,9 @@ func TestSetResource_SQS_Queue_GetAttributes(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "sqs")
+	i := testutil.NewInferrerForService(t, "sqs")
 
-	crd := testutil.GetCRDByName(t, g, "Queue")
+	crd := testutil.GetCRDByName(t, i, "Queue")
 	require.NotNil(crd)
 
 	// The output shape for the GetAttributes operation contains a single field
@@ -2505,9 +2505,9 @@ func TestSetResource_RDS_DBSubnetGroup_ReadMany(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "rds")
+	i := testutil.NewInferrerForService(t, "rds")
 
-	crd := testutil.GetCRDByName(t, g, "DBSubnetGroup")
+	crd := testutil.GetCRDByName(t, i, "DBSubnetGroup")
 	require.NotNil(crd)
 
 	// There are renamed fields for Name and Description in order to
@@ -2591,9 +2591,9 @@ func TestGetWrapperOutputShape(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "dynamodb")
+	i := testutil.NewInferrerForService(t, "dynamodb")
 
-	crd := testutil.GetCRDByName(t, g, "Backup")
+	crd := testutil.GetCRDByName(t, i, "Backup")
 	require.NotNil(crd)
 
 	op := crd.Ops.ReadOne.OutputRef.Shape
@@ -2650,9 +2650,9 @@ func TestSetResource_MQ_Broker_SetResourceIdentifiers(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "mq")
+	i := testutil.NewInferrerForService(t, "mq")
 
-	crd := testutil.GetCRDByName(t, g, "Broker")
+	crd := testutil.GetCRDByName(t, i, "Broker")
 	require.NotNil(crd)
 
 	expected := `
@@ -2672,9 +2672,9 @@ func TestSetResource_RDS_DBInstances_SetResourceIdentifiers(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "rds")
+	i := testutil.NewInferrerForService(t, "rds")
 
-	crd := testutil.GetCRDByName(t, g, "DBInstance")
+	crd := testutil.GetCRDByName(t, i, "DBInstance")
 	require.NotNil(crd)
 
 	expected := `
@@ -2694,9 +2694,9 @@ func TestSetResource_APIGWV2_ApiMapping_SetResourceIdentifiers(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "apigatewayv2")
+	i := testutil.NewInferrerForService(t, "apigatewayv2")
 
-	crd := testutil.GetCRDByName(t, g, "ApiMapping")
+	crd := testutil.GetCRDByName(t, i, "ApiMapping")
 	require.NotNil(crd)
 
 	expected := `

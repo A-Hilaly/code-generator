@@ -24,7 +24,7 @@ import (
 	"github.com/aws-controllers-k8s/code-generator/pkg/model"
 )
 
-func NewGeneratorForService(t *testing.T, serviceAlias string) *generate.Generator {
+func NewInferrerForService(t *testing.T, serviceAlias string) *generate.Inferrer {
 	path, _ := filepath.Abs("testdata")
 	// We have subdirectories in pkg/generate that rely on the testdata in
 	// pkg/generate. This code simply detects if we're running from one of
@@ -47,9 +47,9 @@ func NewGeneratorForService(t *testing.T, serviceAlias string) *generate.Generat
 	if _, err := os.Stat(generatorConfigPath); os.IsNotExist(err) {
 		generatorConfigPath = ""
 	}
-	g, err := generate.New(sdkAPI, "v1alpha1", generatorConfigPath, ackgenerate.DefaultConfig)
+	inferrer, err := generate.NewInferrer(sdkAPI, "v1alpha1", generatorConfigPath, ackgenerate.DefaultConfig)
 	if err != nil {
 		t.Fatal(err)
 	}
-	return g
+	return inferrer
 }

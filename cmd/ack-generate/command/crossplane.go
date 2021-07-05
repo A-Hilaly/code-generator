@@ -74,7 +74,7 @@ func generateCrossplane(_ *cobra.Command, args []string) error {
 	if os.IsNotExist(err) {
 		cfgPath = ""
 	}
-	g, err := generate.New(
+	g, err := generate.NewInferrer(
 		sdkAPI, optGenVersion, cfgPath, cpgenerate.DefaultConfig,
 	)
 	if err != nil {

@@ -26,9 +26,9 @@ func TestMQ_Broker(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "mq")
+	i := testutil.NewInferrerForService(t, "mq")
 
-	crd := testutil.GetCRDByName(t, g, "Broker")
+	crd := testutil.GetCRDByName(t, i, "Broker")
 	require.NotNil(crd)
 
 	// We want to verify that the `Password` field of the `Spec.Users` field
@@ -45,7 +45,7 @@ func TestMQ_Broker(t *testing.T) {
 	// generator has had its Go type changed from `string` to
 	// `*ackv1alpha1.SecretKeyReference` as part of the nested fields
 	// post-processing of type defs in the GetTypeDefs() method.
-	tdef := testutil.GetTypeDefByName(t, g, "User")
+	tdef := testutil.GetTypeDefByName(t, i, "User")
 	require.NotNil(tdef)
 	passAttr, found := tdef.Attrs["Password"]
 	require.True(found)
@@ -56,9 +56,9 @@ func TestMQ_GetOutputShapeGoType(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "mq")
+	i := testutil.NewInferrerForService(t, "mq")
 
-	crd := testutil.GetCRDByName(t, g, "Broker")
+	crd := testutil.GetCRDByName(t, i, "Broker")
 	require.NotNil(crd)
 
 	exp := "*svcsdk.CreateBrokerResponse"

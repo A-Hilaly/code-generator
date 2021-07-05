@@ -95,9 +95,9 @@ func TestEnumDefs(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		g := testutil.NewGeneratorForService(t, test.service)
+		i := testutil.NewInferrerForService(t, test.service)
 
-		edefs, err := g.GetEnumDefs()
+		edefs, err := i.GetEnumDefs()
 		require.Nil(err)
 
 		edef := getEnumDefByName(test.expNameCamel, edefs)

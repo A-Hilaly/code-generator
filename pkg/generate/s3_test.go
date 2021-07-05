@@ -26,9 +26,9 @@ func TestS3_Bucket(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "s3")
+	i := testutil.NewInferrerForService(t, "s3")
 
-	crds, err := g.GetCRDs()
+	crds, err := i.GetCRDs()
 	require.Nil(err)
 
 	// Pronounced "Boo-Kay".

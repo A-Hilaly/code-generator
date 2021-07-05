@@ -27,9 +27,9 @@ func TestCompareResource_S3_Bucket(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "s3")
+	i := testutil.NewInferrerForService(t, "s3")
 
-	crd := testutil.GetCRDByName(t, g, "Bucket")
+	crd := testutil.GetCRDByName(t, i, "Bucket")
 	require.NotNil(crd)
 
 	// The ACL field is ignored in the S3 generator config and therefore should
@@ -108,9 +108,9 @@ func TestCompareResource_Lambda_CodeSigningConfig(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "lambda")
+	i := testutil.NewInferrerForService(t, "lambda")
 
-	crd := testutil.GetCRDByName(t, g, "CodeSigningConfig")
+	crd := testutil.GetCRDByName(t, i, "CodeSigningConfig")
 	require.NotNil(crd)
 
 	expected := `

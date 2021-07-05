@@ -26,9 +26,9 @@ func TestEC2_LaunchTemplate(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "ec2")
+	i := testutil.NewInferrerForService(t, "ec2")
 
-	crds, err := g.GetCRDs()
+	crds, err := i.GetCRDs()
 	require.Nil(err)
 
 	crd := getCRDByName("LaunchTemplate", crds)

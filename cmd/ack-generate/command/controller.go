@@ -76,7 +76,7 @@ func generateController(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	g, err := generate.New(
+	g, err := generate.NewInferrer(
 		sdkAPI, latestAPIVersion, optGeneratorConfigPath, ackgenerate.DefaultConfig,
 	)
 	if err != nil {

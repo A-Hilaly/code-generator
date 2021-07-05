@@ -25,12 +25,12 @@ import (
 // GetCRDByName returns a CRD model with the supplied name
 func GetCRDByName(
 	t *testing.T,
-	g *generate.Generator,
+	inferrer *generate.Inferrer,
 	name string,
 ) *model.CRD {
 	require := require.New(t)
 
-	crds, err := g.GetCRDs()
+	crds, err := inferrer.GetCRDs()
 	require.Nil(err)
 
 	for _, c := range crds {
@@ -44,12 +44,12 @@ func GetCRDByName(
 // GetTypeDefByName returns a TypeDef model with the supplied name
 func GetTypeDefByName(
 	t *testing.T,
-	g *generate.Generator,
+	inferrer *generate.Inferrer,
 	name string,
 ) *model.TypeDef {
 	require := require.New(t)
 
-	tdefs, err := g.GetTypeDefs()
+	tdefs, err := inferrer.GetTypeDefs()
 	require.Nil(err)
 
 	for _, tdef := range tdefs {

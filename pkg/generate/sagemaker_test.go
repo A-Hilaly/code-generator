@@ -27,9 +27,9 @@ func TestSageMaker_ARN_Field_Override(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "sagemaker")
+	i := testutil.NewInferrerForService(t, "sagemaker")
 
-	crds, err := g.GetCRDs()
+	crds, err := i.GetCRDs()
 	require.Nil(err)
 
 	crd := getCRDByName("DataQualityJobDefinition", crds)
@@ -72,9 +72,9 @@ func TestSageMaker_Error_Prefix_Message(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "sagemaker")
+	i := testutil.NewInferrerForService(t, "sagemaker")
 
-	crds, err := g.GetCRDs()
+	crds, err := i.GetCRDs()
 	require.Nil(err)
 
 	crd := getCRDByName("TrainingJob", crds)
@@ -110,9 +110,9 @@ func TestSageMaker_Error_Suffix_Message(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "sagemaker")
+	i := testutil.NewInferrerForService(t, "sagemaker")
 
-	crds, err := g.GetCRDs()
+	crds, err := i.GetCRDs()
 	require.Nil(err)
 
 	crd := getCRDByName("ModelPackageGroup", crds)
@@ -145,9 +145,9 @@ func TestSageMaker_RequeueOnSuccessSeconds(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "sagemaker")
+	i := testutil.NewInferrerForService(t, "sagemaker")
 
-	crds, err := g.GetCRDs()
+	crds, err := i.GetCRDs()
 	require.Nil(err)
 
 	crd := getCRDByName("Endpoint", crds)
@@ -178,7 +178,7 @@ func TestSageMaker_RequeueOnSuccessSeconds(t *testing.T) {
 	// 	}
 	//   }
 	//
-	// So, we expect that crd.ReconcileRequeuOnSuccessSeconds() returns the requeue 
+	// So, we expect that crd.ReconcileRequeuOnSuccessSeconds() returns the requeue
 	// duration specified in the config file
 	assert.Equal(10, crd.ReconcileRequeuOnSuccessSeconds())
 }
@@ -187,9 +187,9 @@ func TestSageMaker_RequeueOnSuccessSeconds_Default(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	g := testutil.NewGeneratorForService(t, "sagemaker")
+	i := testutil.NewInferrerForService(t, "sagemaker")
 
-	crds, err := g.GetCRDs()
+	crds, err := i.GetCRDs()
 	require.Nil(err)
 
 	crd := getCRDByName("DataQualityJobDefinition", crds)
@@ -221,7 +221,7 @@ func TestSageMaker_RequeueOnSuccessSeconds_Default(t *testing.T) {
 	// 	}
 	// }
 	//
-	// So, we expect that crd.ReconcileRequeuOnSuccessSeconds() returns the default  
+	// So, we expect that crd.ReconcileRequeuOnSuccessSeconds() returns the default
 	// requeue duration of 0 because it is not specified in the config file
 	assert.Equal(0, crd.ReconcileRequeuOnSuccessSeconds())
 
