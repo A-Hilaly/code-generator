@@ -21,6 +21,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"gopkg.in/src-d/go-git.v4"
+
 	ackgenconfig "github.com/aws-controllers-k8s/code-generator/pkg/generate/config"
 	"github.com/aws-controllers-k8s/code-generator/pkg/names"
 	"github.com/aws-controllers-k8s/code-generator/pkg/util"
@@ -42,8 +44,9 @@ var (
 // SDKHelper is a helper struct that helps work with the aws-sdk-go models and
 // API model loader
 type SDKHelper struct {
-	basePath string
-	loader   *awssdkmodel.Loader
+	gitRepository *git.Repository
+	basePath      string
+	loader        *awssdkmodel.Loader
 	// Default is "services.k8s.aws"
 	APIGroupSuffix string
 }
@@ -57,6 +60,24 @@ func NewSDKHelper(basePath string) *SDKHelper {
 			IgnoreUnsupportedAPIs: true,
 		},
 	}
+}
+
+// WithSDKVersion checkout the sdk git repository to the provided version. To use
+// this function h.basePath should point to a git repository.
+func (h *SDKHelper) WithSDKVersion(version string) error {
+	if h.gitRepository == nil {
+		gitRepository, err := util.LoadRepository(h.basePath)
+		if err != nil {
+			return fmt.Errorf("error loading repository from %s: %v", h.basePath, err)
+		}
+		h.gitRepository = gitRepository
+	}
+
+	err := util.CheckoutRepositoryTag(h.gitRepository, version)
+	if err != nil {
+		return fmt.Errorf("cannot checkout tag %s: %v", version, err)
+	}
+	return nil
 }
 
 // API returns the aws-sdk-go API model for a supplied service alias
