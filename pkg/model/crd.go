@@ -560,7 +560,7 @@ func (r *CRD) PrintAgeColumn() bool {
 }
 
 // ReconcileRequeuOnSuccessSeconds returns the duration after which to requeue
-// the custom resource as int, if specified in generator config. 
+// the custom resource as int, if specified in generator config.
 func (r *CRD) ReconcileRequeuOnSuccessSeconds() int {
 	if r.cfg == nil {
 		return 0
@@ -598,6 +598,41 @@ func (r *CRD) CustomUpdateMethodName() string {
 // check a corresponding value in the target Spec exists.
 func (r *CRD) ListOpMatchFieldNames() []string {
 	return r.cfg.ListOpMatchFieldNames(r.Names.Original)
+}
+
+// GetAllRenames returns all the fields renames observed in the generator.yaml.
+// It will return two rename maps, the first is mapping the old names to the new
+// ones, the other is mapping the new names to the old ones.
+func (r *CRD) GetAllRenames() (
+	map[string]string,
+	map[string]string,
+	error,
+) {
+	resourceConfig, ok := r.cfg.Resources[r.Names.Original]
+	if !ok {
+		return nil, nil, fmt.Errorf("resource not found")
+	}
+
+	oldToNewMap := make(map[string]string)
+	newToOldMap := make(map[string]string)
+
+	opMap := r.sdkAPI.GetOperationMap(r.cfg)
+	createOps := (*opMap)[OpTypeCreate]
+
+	if resourceConfig.Renames != nil && resourceConfig.Renames.Operations != nil {
+		opRenameConfigs := resourceConfig.Renames.Operations
+		for opName, opRenameConfigs := range opRenameConfigs {
+			for _, op := range createOps {
+				if opName == op.Name {
+					for old, new := range opRenameConfigs.InputFields {
+						oldToNewMap[old] = new
+						newToOldMap[new] = old
+					}
+				}
+			}
+		}
+	}
+	return oldToNewMap, newToOldMap, nil
 }
 
 // NewCRD returns a pointer to a new `ackmodel.CRD` struct that describes a
